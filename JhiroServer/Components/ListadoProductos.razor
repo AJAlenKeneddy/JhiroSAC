@@ -1,0 +1,45 @@
+﻿@page "/productos"
+@using JhiroServer.Services
+@inject ProductoService ProductoService
+@using JhiroServer.Models
+
+<section class="container my-5">
+    <h2 class="text-center mb-4">Productos Destacados</h2>
+    <div class="row">
+        @if (productos == null)
+        {
+            <p><em>Cargando...</em></p>
+        }
+        else if (productos.Count == 0)
+        {
+            <p>No hay productos disponibles.</p>
+        }
+        else
+        {
+            @foreach (var producto in productos)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card shadow-sm border-light rounded">
+                        <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">@producto.Nombre</h5>
+                            <p class="card-text">@producto.Descripcion</p>
+                            <p class="card-text font-weight-bold">Precio: @producto.Precio.ToString("C")</p>
+                            <p class="card-text text-muted">Stock: @producto.Stock</p>
+                            <a href="#" class="btn btn-primary">Comprar Ahora</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+
+@code {
+    private List<Producto> productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await ProductoService.GetProductosAsync();
+    }
+}

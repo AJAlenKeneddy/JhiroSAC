@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Back.Models
+namespace JhiroServer.Models
 {
     public partial class Inventario
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Back.Models
+namespace JhiroServer.Models
 {
     public partial class JhiroTiendaDBContext : DbContext
     {

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Back.Models;
+using JhiroServer.Models;
 
-namespace Back.Controllers
+namespace JhiroServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
