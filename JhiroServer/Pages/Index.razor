@@ -1,11 +1,47 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components
 
+<!-- Contenedor principal con fondo de imagen -->
+<div class="welcome">
+    <!-- Contenido del hero con sombreado -->
+    <div class="hero-content shaded">
+        <h1>BIENVENIDO</h1>
+        <p>Explora nuestra selección de hilos, telas, ropa y zapatillas de calidad superior. Encuentra todo lo que necesitas para tus proyectos creativos y más.</p>
+        <p>¡Bienvenido a tu fuente confiable de inspiración textil!</p>
+    </div>
+</div>
 
-<PageTitle>Index</PageTitle>
+<!-- Secciones intercaladas combinadas en un solo div -->
+<div class="hero-container">
+    <div class="hero-content shaded">
+        <div class="content-section">
+            <!-- Imagen -->
+            <img src="https://i.imgur.com/9Hgkclh.jpeg" alt="Hilos">
+            <!-- Texto -->
+            <div class="content-text">
+                <h2>La perfección en tus proyectos empieza con la elección de nuestros hilos.</h2>
+                <p>Calidad superior y variedad de colores y texturas para todos tus proyectos.</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<h1>Hello, world!</h1>
-
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div class="hero-container">
+    <div class="hero-content shaded">
+        <div class="content-section">
+            <!-- Texto -->
+            <div class="content-text">
+                <h2>¿Buscas telas que inspiren tus proyectos creativos?</h2>
+                <p>Descubre nuestras telas de calidad premium con texturas y estampados únicos.</p>
+            </div>
+            <!-- Imagen -->
+            <img src="https://i.imgur.com/aoyW7u5.jpeg" alt="Telas">
+        </div>
+    </div>
+</div>
+<ListadoProductos CategoriaId="1"/>
+<br />
+<ListadoProductos CategoriaId="2"/>
+<style>
+    
+</style>

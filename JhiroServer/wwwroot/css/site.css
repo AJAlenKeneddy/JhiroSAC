@@ -108,3 +108,82 @@ a, .btn-link {
 .mb-4 {
     margin-bottom: 1.5rem;
 }
+
+/* Contenedor principal con fondo de imagen */
+.hero-container {
+    background-position: center;
+    height: 100vh; /* Ocupa toda la pantalla */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px;
+    margin-bottom: 0; /* Quita márgenes negativos */
+}
+
+.welcome {
+    background-image: url("https://i.imgur.com/Xuwsoam.jpeg");
+    height: 100vh; /* Ajusta la altura para que sea consistente */
+    background-size: cover; /* La imagen cubrirá todo el contenedor */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    margin-bottom: 0; /* Quita márgenes negativos */
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    width: 100%;
+}
+
+    .hero-content.shaded {
+        background-color: rgba(0, 0, 0, 0.5); /* Sombreado para mejorar legibilidad */
+        color: white;
+        padding: 50px;
+        border-radius: 10px;
+    }
+
+.content-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ajustado para mejor alineación */
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto; /* Centra la sección */
+    padding: 40px 20px; /* Añade padding para consistencia */
+}
+
+.content-text {
+    width: 50%;
+    text-align: left;
+}
+
+.content-section img {
+    width: 45%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .content-section {
+        flex-direction: column;
+        padding: 20px; /* Ajusta el padding para pantallas pequeñas */
+    }
+
+        .content-text, .content-section img {
+            width: 100%; /* Asegura que el contenido ocupe todo el ancho */
+            text-align: center; /* Centra el texto en pantallas pequeñas */
+        }
+}
+
+
+

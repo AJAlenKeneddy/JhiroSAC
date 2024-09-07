@@ -142,6 +142,27 @@ namespace JhiroServer.Controllers
             return NoContent();
         }
 
+        [HttpGet("NombreCategorias/{id}")]
+        public async Task<ActionResult<Categoria>> GetCategoriaNombre(int id)
+        {
+            var categoria = await _context.Categorias
+                                           .Where(c => c.CategoriaId == id)
+                                           .Select(c => new Categoria
+                                           {
+                                               Nombre = c.Nombre,
+                                               Publicidad = c.Publicidad
+                                           })
+                                           .FirstOrDefaultAsync();
+
+            if (categoria == null)
+            {
+                return NotFound("Categoría no encontrada.");
+            }
+
+            return Ok(categoria);
+        }
+
+
         private bool CategoriaExists(int id)
         {
             return (_context.Categorias?.Any(e => e.CategoriaId == id)).GetValueOrDefault();

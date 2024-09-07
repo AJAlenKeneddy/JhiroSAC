@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JhiroServer.Models;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace JhiroServer.Controllers
 {
@@ -170,6 +172,62 @@ namespace JhiroServer.Controllers
 
             return NoContent();
         }
+
+        // GET: api/Productoes/GetProductosPorCategoria
+        [HttpGet("GetProductosPorCategoria")]
+        public async Task<IActionResult> GetProductosPorCategoria(int categoriaId, int pageNumber = 1)
+        {
+            try
+            {
+                var productos = new List<Producto>();
+
+                var connectionString = _context.Database.GetConnectionString();
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    using (var command = new SqlCommand("sp_GetProductosPorCategoria", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@CategoriaId", categoriaId);
+                        command.Parameters.AddWithValue("@PageNumber", pageNumber);
+
+                        connection.Open();
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                productos.Add(new Producto
+                                {
+                                    ProductoId = reader.GetInt32(reader.GetOrdinal("ProductoId")),
+                                    Nombre = reader.GetString(reader.GetOrdinal("Nombre")),
+                                    Descripcion = reader.GetString(reader.GetOrdinal("Descripcion")),
+                                    Precio = reader.GetDecimal(reader.GetOrdinal("Precio")),
+                                    Stock = reader.GetInt32(reader.GetOrdinal("Stock")),
+                                    ImagenUrl = reader.GetString(reader.GetOrdinal("ImagenUrl")),
+                                    CategoriaId = reader.GetInt32(reader.GetOrdinal("CategoriaId")),
+                                    Eliminado = reader.GetBoolean(reader.GetOrdinal("Eliminado"))
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Filtra los productos eliminados
+                productos = productos.Where(p => !p.Eliminado).ToList();
+
+                if (productos.Count == 0)
+                    return NotFound("No se encontraron productos para la categoría especificada.");
+
+                return Ok(productos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
+
+
 
         private bool ProductoExists(int id)
         {

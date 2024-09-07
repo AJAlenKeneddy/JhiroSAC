@@ -1,0 +1,121 @@
+﻿@page "/productos/{CategoriaId:int}"
+@using JhiroServer.Services
+@inject ProductoService ProductoService
+@using JhiroServer.Models
+
+@if (Categoria == null)
+{
+    <p>Cargando datos...</p>
+}
+else
+{
+    <h1 style="text-align: center; color: #007bff;">@Categoria?.Nombre</h1>
+    <p style="text-align: center; color: #6c757d;">@Categoria?.Publicidad</p>
+
+    @if (productos == null)
+    {
+        <p>Cargando productos...</p>
+    }
+    else if (productos.Count == 0)
+    {
+        <p>No hay productos disponibles en esta categoría.</p>
+    }
+    else
+    {
+        <div class="container">
+            @* Dividir productos en filas de 3 *@
+            @foreach (var row in GetRows(productos))
+            {
+                <div class="row">
+                    @foreach (var producto in row)
+                    {
+                        <div class="col-md-4 mb-4">
+                            <div class="card product-card shadow-sm border-light rounded">
+                                <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">@producto.Nombre</h5>
+                                    <p class="card-text">@producto.Descripcion</p>
+                                    <p class="card-text font-weight-bold">Precio: @producto.Precio.ToString("C")</p>
+                                    <p class="card-text text-muted">Stock: @producto.Stock</p>
+                                    <a href="#" class="btn btn-primary">Comprar Ahora</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            @* Paginación *@
+            <div class="d-flex justify-content-between mt-3">
+                <button @onclick="PreviousPage" class="btn btn-secondary" disabled="@(pageNumber == 1)">Anterior</button>
+                <span class="align-self-center">Página @pageNumber</span>
+                <button @onclick="NextPage" class="btn btn-secondary" disabled="@(productos.Count < pageSize)">Siguiente</button>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] 
+    public int CategoriaId { get; set; }
+    private List<Producto> productos;
+    private Categoria Categoria;
+    private int pageNumber = 1;
+    private int pageSize = 6;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Obtener productos
+            productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
+
+            // Obtener información de la categoría
+            Categoria = await ProductoService.GetCategoriaAsync(CategoriaId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al inicializar datos: {ex.Message}");
+        }
+    }
+
+    private async Task NextPage()
+    {
+        pageNumber++;
+        await LoadProductsAsync();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            pageNumber--;
+            await LoadProductsAsync();
+        }
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        try
+        {
+            // Obtener productos
+            productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
+
+            // Obtener información de la categoría
+            Categoria = await ProductoService.GetCategoriaAsync(CategoriaId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar productos: {ex.Message}");
+        }
+    }
+
+    private IEnumerable<IEnumerable<Producto>> GetRows(List<Producto> productos)
+    {
+        // Dividir la lista de productos en filas de 3
+        for (int i = 0; i < productos.Count; i += 3)
+        {
+            yield return productos.Skip(i).Take(3);
+        }
+    }
+}

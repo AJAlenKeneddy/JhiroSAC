@@ -20,12 +20,16 @@ namespace JhiroServer.Models
         public virtual DbSet<Inventario> Inventarios { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
 
-        
+  
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Categoria>(entity =>
             {
                 entity.Property(e => e.Nombre).HasMaxLength(100);
+
+                entity.Property(e => e.Publicidad)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Inventario>(entity =>

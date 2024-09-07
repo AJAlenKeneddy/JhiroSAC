@@ -1,5 +1,7 @@
 ﻿@page "/fetchdata"
 
+@using JhiroServer.Pages;
+
 <PageTitle>Weather forecast</PageTitle>
 
 @using JhiroServer.Data
@@ -8,7 +10,7 @@
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
-
+<ListadoProductos CategoriaId="2" />
 @if (forecasts == null)
 {
     <p><em>Loading...</em></p>
