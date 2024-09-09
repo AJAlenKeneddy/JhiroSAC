@@ -1,0 +1,58 @@
+﻿@page "/admin/productos/eliminados"
+@using JhiroServer.Services
+@using JhiroServer.Models
+@inject ProductoService ProductoService
+
+<h1>Productos Eliminados</h1>
+
+@if (productosEliminados == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (productosEliminados.Count == 0)
+{
+    <p>No hay productos eliminados.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>ImagenUrl</th>
+                <th>Eliminado</th>
+                <th>Categoría</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in productosEliminados)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.Descripcion</td>
+                    <td>@item.Precio</td>
+                    <td>@item.Stock</td>
+                    <td>@item.ImagenUrl</td>
+                    <td>@item.Eliminado</td>
+                    <td>@item.Categoria?.CategoriaId</td>
+                    <td>
+                        <a href="/admin/productos/restaurar/@item.ProductoId">Restaurar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Producto> productosEliminados;
+
+    protected override async Task OnInitializedAsync()
+    {
+        productosEliminados = await ProductoService.GetProductosEliminadosAsync();
+    }
+}

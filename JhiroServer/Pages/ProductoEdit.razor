@@ -1,0 +1,89 @@
+﻿@page "/admin/productos/edit/{id:int}"
+@using JhiroServer.Services
+@using JhiroServer.Models
+@inject ProductoService ProductoService
+@inject NavigationManager NavigationManager
+
+<h3>Editar Producto</h3>
+
+@if (producto == null)
+{
+    <p><em>Cargando producto...</em></p>
+}
+else
+{
+    <EditForm Model="@producto" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <InputText id="nombre" class="form-control" @bind-Value="producto.Nombre" />
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <InputTextArea id="descripcion" class="form-control" @bind-Value="producto.Descripcion" />
+        </div>
+
+        <div class="form-group">
+            <label for="precio">Precio</label>
+            <InputNumber id="precio" class="form-control" @bind-Value="producto.Precio" />
+        </div>
+
+        <div class="form-group">
+            <label for="stock">Stock</label>
+            <InputNumber id="stock" class="form-control" @bind-Value="producto.Stock" />
+        </div>
+
+        <div class="form-group">
+            <label for="imagenUrl">Imagen URL</label>
+            <InputText id="imagenUrl" class="form-control" @bind-Value="producto.ImagenUrl" />
+        </div>
+
+        <div class="form-group">
+            <label for="categoriaId">Categoría ID</label>
+            <InputNumber id="categoriaId" class="form-control" @bind-Value="producto.CategoriaId" />
+        </div>
+
+        <div class="form-check">
+            <InputCheckbox id="eliminado" class="form-check-input" @bind-Value="producto.Eliminado" />
+            <label for="eliminado" class="form-check-label">Eliminado</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-secondary" @onclick="VolverAtras">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+    private Producto producto = new Producto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        producto = await ProductoService.GetProductoByIdAsync(id);
+        if (producto == null)
+        {
+            NavigationManager.NavigateTo("/admin/productos");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await ProductoService.UpdateProductoAsync(producto);
+        if (result)
+        {
+            NavigationManager.NavigateTo("/admin/productos");
+        }
+        else
+        {
+            Console.WriteLine("Error al actualizar el producto.");
+        }
+    }
+
+    private void VolverAtras()
+    {
+        NavigationManager.NavigateTo("/admin/productos");
+    }
+}

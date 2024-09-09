@@ -1,0 +1,75 @@
+﻿@page "/admin/productos"
+@using JhiroServer.Services
+@using JhiroServer.Models
+@inject ProductoService ProductoService
+
+<h1>Productos</h1>
+
+<p>
+    <a href="/admin/productos/create">Create New</a> |
+    <a href="/admin/productos/eliminados">View Deleted Products</a>
+</p>
+
+
+@if (productos == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (productos.Count == 0)
+{
+    <p>No hay productos disponibles.</p>
+}
+else
+{
+    @if (productos != null && productos.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>ImagenUrl</th>
+                    <th>Eliminado</th>
+                    <th>Categoría</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in productos)
+                {
+                    <tr>
+                        <td>@item.Nombre</td>
+                        <td>@item.Descripcion</td>
+                        <td>@item.Precio</td>
+                        <td>@item.Stock</td>
+                        <td>@item.ImagenUrl</td>
+                        <td>@item.Eliminado</td>
+                        <td>@item.Categoria?.CategoriaId</td>
+                        <td>
+                            <a href="/admin/productos/edit/@item.ProductoId">Edit</a> |
+                            <a href="/admin/productos/details/@item.ProductoId">Details</a> |
+                            <a href="/admin/productos/delete/@item.ProductoId">Delete</a>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No se encontraron productos.</p>
+    }
+
+}
+
+@code {
+    private List<Producto> productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await ProductoService.GetProductosAsync();
+    }
+}

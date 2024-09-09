@@ -23,7 +23,7 @@ namespace JhiroServer.Controllers
         }
 
         // GET: api/Productoes
-        [HttpGet]
+        [HttpGet("obtenerProductos")]
         public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
         {
             if (_context.Productos == null)
@@ -37,8 +37,23 @@ namespace JhiroServer.Controllers
                                 .ToListAsync();
         }
 
+
+        [HttpGet("obtenerProductosEliminados")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetProductosEliminados()
+        {
+            if (_context.Productos == null)
+            {
+                return NotFound();
+            }
+
+            // Filtrar por productos que no han sido eliminados lógicamente
+            return await _context.Productos
+                                .Where(p => p.Eliminado)
+                                .ToListAsync();
+        }
+
         // GET: api/Productoes/5
-        [HttpGet("{id}")]
+        [HttpGet("UnProducto/{id}")]
         public async Task<ActionResult<Producto>> GetProducto(int id)
         {
             if (_context.Productos == null)
@@ -59,8 +74,30 @@ namespace JhiroServer.Controllers
             return producto;
         }
 
+        [HttpGet("UnProductoEliminado/{id}")]
+        public async Task<ActionResult<Producto>> GetProductoEliminado(int id)
+        {
+            if (_context.Productos == null)
+            {
+                return NotFound();
+            }
+
+            // Buscar producto por ID y verificar que esté eliminado
+            var producto = await _context.Productos
+                                          .Where(p => p.ProductoId == id && p.Eliminado) // Suponiendo que 'Eliminado' es un bool
+                                          .FirstOrDefaultAsync();
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return producto;
+        }
+
+
         // PUT: api/Productoes/5
-        [HttpPut("{id}")]
+        [HttpPut("ActualizarProducto/{id}")]
         public async Task<IActionResult> PutProducto(int id, Producto producto)
         {
             if (id != producto.ProductoId)
@@ -105,7 +142,7 @@ namespace JhiroServer.Controllers
         }
 
         // POST: api/Productoes
-        [HttpPost]
+        [HttpPost("CrearProducto")]
         public async Task<ActionResult<Producto>> PostProducto(Producto producto)
         {
             if (_context.Productos == null)
@@ -122,7 +159,7 @@ namespace JhiroServer.Controllers
         }
 
         // DELETE: api/Productoes/5
-        [HttpDelete("{id}")]
+        [HttpDelete("EliminarProducto/{id}")]
         public async Task<IActionResult> DeleteProducto(int id)
         {
             if (_context.Productos == null)
@@ -146,7 +183,7 @@ namespace JhiroServer.Controllers
         }
 
         // POST: api/Productoes/restore/5
-        [HttpPost("restore/{id}")]
+        [HttpPost("RestaurarProducto/{id}")]
         public async Task<IActionResult> RestoreProducto(int id)
         {
             if (_context.Productos == null)

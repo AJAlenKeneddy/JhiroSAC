@@ -1,0 +1,83 @@
+﻿@page "/admin/productos/create"
+@using JhiroServer.Services
+@using JhiroServer.Models
+@inject ProductoService ProductoService
+@inject NavigationManager NavigationManager
+
+<h1>Agregar Nuevo Producto</h1>
+
+@if (producto == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <EditForm Model="producto" OnValidSubmit="AgregarProducto">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <InputText id="nombre" class="form-control" @bind-Value="producto.Nombre" />
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <InputText id="descripcion" class="form-control" @bind-Value="producto.Descripcion" />
+        </div>
+
+        <div class="form-group">
+            <label for="precio">Precio</label>
+            <InputNumber id="precio" class="form-control" @bind-Value="producto.Precio" />
+        </div>
+
+        <div class="form-group">
+            <label for="stock">Stock</label>
+            <InputNumber id="stock" class="form-control" @bind-Value="producto.Stock" />
+        </div>
+
+        <div class="form-group">
+            <label for="imagenUrl">Imagen URL</label>
+            <InputText id="imagenUrl" class="form-control" @bind-Value="producto.ImagenUrl" />
+        </div>
+
+        <div class="form-group">
+            <label for="categoriaId">Categoría</label>
+            <InputNumber id="categoriaId" class="form-control" @bind-Value="producto.CategoriaId" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Agregar Producto</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    private Producto producto = new Producto();
+
+    private async Task AgregarProducto()
+    {
+        try
+        {
+            var resultado = await ProductoService.CreateProductoAsync(producto);
+            if (resultado)
+            {
+                NavigationManager.NavigateTo("/admin/productos");
+            }
+            else
+            {
+                // Manejar error (ej., mostrar mensaje de error al usuario)
+                Console.WriteLine("Error al agregar el producto.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Manejar excepción (ej., mostrar mensaje de error al usuario)
+            Console.WriteLine($"Excepción: {ex.Message}");
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo("/admin/productos");
+    }
+}

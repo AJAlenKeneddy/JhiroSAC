@@ -185,5 +185,91 @@ a, .btn-link {
         }
 }
 
+/* Estilo general de la tabla */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+    color: #333;
+    font-weight: bold; /* Pone el texto en negrita en toda la tabla */
+}
 
+    /* Estilo para los encabezados de la tabla */
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #495057;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: bold; /* Asegura que los encabezados también estén en negrita */
+    }
+
+    /* Estilo para las filas de la tabla */
+    .table tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .table tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+
+    .table tbody td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: bold; /* Pone el texto en negrita en el contenido de las celdas */
+    }
+
+    /* Estilo para el borde de la tabla */
+    .table, .table th, .table td {
+        border: 1px solid #dee2e6;
+    }
+
+        /* Estilo para la tabla al pasar el cursor */
+        .table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Estilo para los botones en la tabla */
+        .table a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold; /* Asegura que los enlaces también estén en negrita */
+        }
+
+            .table a:hover {
+                text-decoration: underline;
+            }
+
+        /* Estilo para el borde de los botones */
+        .table a {
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 14px;
+            display: inline-block;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+            .table a.btn-primary {
+                color: #ffffff;
+                background-color: #007bff;
+                border-color: #007bff;
+            }
+
+                .table a.btn-primary:hover {
+                    background-color: #0056b3;
+                    border-color: #004085;
+                }
+
+            .table a.btn-secondary {
+                color: #ffffff;
+                background-color: #6c757d;
+                border-color: #6c757d;
+            }
+
+                .table a.btn-secondary:hover {
+                    background-color: #5a6268;
+                    border-color: #545b62;
+                }
 
