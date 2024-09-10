@@ -2,6 +2,7 @@
 @using JhiroServer.Services
 @using JhiroServer.Models
 @inject ProductoService ProductoService
+@inject IJSRuntime JsRuntime
 
 <h1>Productos Eliminados</h1>
 
@@ -22,10 +23,8 @@ else
                 <th>Descripción</th>
                 <th>Precio</th>
                 <th>Stock</th>
-                <th>ImagenUrl</th>
-                <th>Eliminado</th>
-                <th>Categoría</th>
-                <th></th>
+                <th>Imagen</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -36,9 +35,9 @@ else
                     <td>@item.Descripcion</td>
                     <td>@item.Precio</td>
                     <td>@item.Stock</td>
-                    <td>@item.ImagenUrl</td>
-                    <td>@item.Eliminado</td>
-                    <td>@item.Categoria?.CategoriaId</td>
+                    <td width="10px">
+                        <img src="@item.ImagenUrl" class="card-img-top" alt="@item.Nombre" @onclick="() => ShowModal(item.ImagenUrl)">
+                    </td>
                     <td>
                         <a href="/admin/productos/restaurar/@item.ProductoId">Restaurar</a>
                     </td>
@@ -48,11 +47,30 @@ else
     </table>
 }
 
+
+<div id="imageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" @onclick="CloseModal">&times;</span>
+        <img id="modalImage" src="" alt="Imagen en grande">
+    </div>
+</div>
+
 @code {
     private List<Producto> productosEliminados;
 
     protected override async Task OnInitializedAsync()
     {
         productosEliminados = await ProductoService.GetProductosEliminadosAsync();
+    }
+
+    private async Task ShowModal(string imageUrl)
+    {
+        await JsRuntime.InvokeVoidAsync("setImageModalSrc", imageUrl);
+        await JsRuntime.InvokeVoidAsync("showImageModal");
+    }
+
+    private async Task CloseModal()
+    {
+        await JsRuntime.InvokeVoidAsync("hideImageModal");
     }
 }

@@ -2,6 +2,7 @@
 @using JhiroServer.Services
 @using JhiroServer.Models
 @inject ProductoService ProductoService
+@inject IJSRuntime JsRuntime
 
 <h1>Detalles del Producto</h1>
 
@@ -12,7 +13,7 @@
 else
 {
     <div class="card" style="width: 18rem;">
-        <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre">
+        <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre" @onclick="() => ShowModal(producto.ImagenUrl)">
         <div class="card-body">
             <h5 class="card-title">@producto.Nombre</h5>
             <p class="card-text">@producto.Descripcion</p>
@@ -25,6 +26,12 @@ else
         </div>
     </div>
 }
+<div id="imageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" @onclick="CloseModal">&times;</span>
+        <img id="modalImage" src="" alt="Imagen en grande">
+    </div>
+</div>
 
 @code {
     [Parameter]
@@ -35,5 +42,15 @@ else
     protected override async Task OnInitializedAsync()
     {
         producto = await ProductoService.GetProductoByIdAsync(ProductoId);
+    }
+    private async Task ShowModal(string imageUrl)
+    {
+        await JsRuntime.InvokeVoidAsync("setImageModalSrc", imageUrl);
+        await JsRuntime.InvokeVoidAsync("showImageModal");
+    }
+
+    private async Task CloseModal()
+    {
+        await JsRuntime.InvokeVoidAsync("hideImageModal");
     }
 }

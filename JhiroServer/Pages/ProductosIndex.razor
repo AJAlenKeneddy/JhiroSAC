@@ -2,7 +2,7 @@
 @using JhiroServer.Services
 @using JhiroServer.Models
 @inject ProductoService ProductoService
-
+@inject IJSRuntime JsRuntime
 <h1>Productos</h1>
 
 <p>
@@ -23,47 +23,54 @@ else
 {
     @if (productos != null && productos.Count > 0)
     {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>ImagenUrl</th>
-                    <th>Eliminado</th>
-                    <th>Categoría</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in productos)
-                {
+        <div class="table-container">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>@item.Nombre</td>
-                        <td>@item.Descripcion</td>
-                        <td>@item.Precio</td>
-                        <td>@item.Stock</td>
-                        <td>@item.ImagenUrl</td>
-                        <td>@item.Eliminado</td>
-                        <td>@item.Categoria?.CategoriaId</td>
-                        <td>
-                            <a href="/admin/productos/edit/@item.ProductoId">Edit</a> |
-                            <a href="/admin/productos/details/@item.ProductoId">Details</a> |
-                            <a href="/admin/productos/delete/@item.ProductoId">Delete</a>
-                        </td>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>ImagenUrl</th>
 
+                        <th>Acciones</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in productos)
+                    {
+                        <tr>
+                            <td data-label="Nombre">@item.Nombre</td>
+                            <td>@item.Descripcion</td>
+                            <td>@item.Precio</td>
+                            <td>@item.Stock</td>
+                            <td width="10px"><img src="@item.ImagenUrl" class="card-img-top" alt="@item.Nombre" @onclick="() => ShowModal(item.ImagenUrl)"></td>
+
+                            <td>
+                                <a href="/admin/productos/edit/@item.ProductoId">Edit</a> |
+                                <a href="/admin/productos/details/@item.ProductoId">Details</a> |
+                                <a href="/admin/productos/delete/@item.ProductoId">Delete</a>
+                            </td>
+
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
-    else
-    {
+    else{    
         <p>No se encontraron productos.</p>
     }
+    
 
 }
+<div id="imageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" @onclick="CloseModal">&times;</span>
+        <img id="modalImage" src="" alt="Imagen en grande">
+    </div>
+</div>
 
 @code {
     private List<Producto> productos;
@@ -72,4 +79,15 @@ else
     {
         productos = await ProductoService.GetProductosAsync();
     }
+    private async Task ShowModal(string imageUrl)
+    {
+        await JsRuntime.InvokeVoidAsync("setImageModalSrc", imageUrl);
+        await JsRuntime.InvokeVoidAsync("showImageModal");
+    }
+
+    private async Task CloseModal()
+    {
+        await JsRuntime.InvokeVoidAsync("hideImageModal");
+    }
 }
+
