@@ -37,7 +37,7 @@ namespace JhiroServer.Services
         {
             try
             {
-                var url = $"http://Jhiro.somee.com/api/Productoes/GetProductosPorCategoria?categoriaId={categoriaId}&pageNumber={pageNumber}";
+                var url = $"https://Jhiro.somee.com/api/Productoes/GetProductosPorCategoria?categoriaId={categoriaId}&pageNumber={pageNumber}";
                 var response = await _httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode(); // Lanza una excepción si el código de estado HTTP no es exitoso
                 return await response.Content.ReadFromJsonAsync<List<Producto>>();
@@ -54,7 +54,7 @@ namespace JhiroServer.Services
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<Categoria>($"http://Jhiro.somee.com/api/Categorias/Categoria/{categoriaId}");
+                return await _httpClient.GetFromJsonAsync<Categoria>($"https://Jhiro.somee.com/api/Categorias/Categoria/{categoriaId}");
             }
             catch (Exception ex)
             {
