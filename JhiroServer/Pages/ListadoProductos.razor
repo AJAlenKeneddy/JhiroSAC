@@ -23,7 +23,7 @@ else
     else
     {
         <div class="container">
-            @* Dividir productos en filas de 3 *@
+            
             @foreach (var row in GetRows(productos))
             {
                 <div class="row">
@@ -45,7 +45,7 @@ else
                 </div>
             }
 
-            @* Paginación *@
+            
             <div class="d-flex justify-content-between mt-3">
                 <button @onclick="PreviousPage" class="btn btn-secondary" disabled="@(pageNumber == 1)">Anterior</button>
                 <span class="align-self-center">Página @pageNumber</span>
@@ -67,10 +67,10 @@ else
     {
         try
         {
-            // Obtener productos
+            
             productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
 
-            // Obtener información de la categoría
+            
             Categoria = await ProductoService.GetCategoriaAsync(CategoriaId);
         }
         catch (Exception ex)
@@ -98,10 +98,10 @@ else
     {
         try
         {
-            // Obtener productos
+            
             productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
 
-            // Obtener información de la categoría
+           
             Categoria = await ProductoService.GetCategoriaAsync(CategoriaId);
         }
         catch (Exception ex)
@@ -112,7 +112,7 @@ else
 
     private IEnumerable<IEnumerable<Producto>> GetRows(List<Producto> productos)
     {
-        // Dividir la lista de productos en filas de 3
+       
         for (int i = 0; i < productos.Count; i += 3)
         {
             yield return productos.Skip(i).Take(3);

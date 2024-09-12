@@ -45,12 +45,9 @@ else
         var resultado = await ProductoService.RestaurarProductoAsync(ProductoId);
         if (resultado)
         {
-            NavigationManager.NavigateTo("/admin/productos", true); // 'true' para forzar la recarga de la página
+            NavigationManager.NavigateTo("/admin/productos", true); 
         }
-        else
-        {
-            // Manejar error
-        }
+        
     }
 
     private void Cancelar()

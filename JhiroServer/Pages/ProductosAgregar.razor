@@ -18,7 +18,7 @@ else
 
         <div class="form-group">
             <label for="nombre">Nombre</label>
-            <InputText id="nombre" class="form-control" @bind-Value="producto.Nombre" />
+            <InputText  id="nombre" class="form-control" @bind-Value="producto.Nombre" />
         </div>
 
         <div class="form-group">
@@ -39,6 +39,17 @@ else
         <div class="form-group">
             <label for="imagenUrl">Imagen URL</label>
             <InputText id="imagenUrl" class="form-control" @bind-Value="producto.ImagenUrl" />
+        </div>
+        <div class="form-group">
+            
+            @if (!string.IsNullOrEmpty(producto.ImagenUrl))
+            {
+                <img width="250" src="@producto.ImagenUrl" alt="Vista previa" class="form-group" />
+            }
+            else
+            {
+                <p>No se ha proporcionado una URL de imagen.</p>
+            }
         </div>
 
         <div class="form-group">
@@ -65,13 +76,13 @@ else
             }
             else
             {
-                // Manejar error (ej., mostrar mensaje de error al usuario)
+                
                 Console.WriteLine("Error al agregar el producto.");
             }
         }
         catch (Exception ex)
         {
-            // Manejar excepción (ej., mostrar mensaje de error al usuario)
+            
             Console.WriteLine($"Excepción: {ex.Message}");
         }
     }

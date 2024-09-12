@@ -40,6 +40,17 @@ else
             <label for="imagenUrl">Imagen URL</label>
             <InputText id="imagenUrl" class="form-control" @bind-Value="producto.ImagenUrl" />
         </div>
+        <div class="form-group" >
+
+            @if (!string.IsNullOrEmpty(producto.ImagenUrl))
+            {
+                <img width="250" src="@producto.ImagenUrl" alt="Vista previa" class="img-preview" />
+            }
+            else
+            {
+                <p>No se ha proporcionado una URL de imagen.</p>
+            }
+        </div>
 
         <div class="form-group">
             <label for="categoriaId">Categoría ID</label>

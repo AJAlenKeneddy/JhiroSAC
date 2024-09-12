@@ -41,10 +41,10 @@ else
                     {
                         <tr>
                             <td data-label="Nombre">@item.Nombre</td>
-                            <td>@item.Descripcion</td>
-                            <td>@item.Precio</td>
-                            <td>@item.Stock</td>
-                            <td width="10px"><img src="@item.ImagenUrl" class="card-img-top" alt="@item.Nombre" @onclick="() => ShowModal(item.ImagenUrl)"></td>
+                            <td data-label="Descripcion">@item.Descripcion</td>
+                            <td data-label="Precio">@item.Precio</td>
+                            <td data-label="Stock">@item.Stock</td>
+                            <td data-label="Imagen" width="250px"><img src="@item.ImagenUrl" class="card-img-top" alt="@item.Nombre" @onclick="() => ShowModal(item.ImagenUrl)"></td>
 
                             <td>
                                 <a href="/admin/productos/edit/@item.ProductoId">Edit</a> |
