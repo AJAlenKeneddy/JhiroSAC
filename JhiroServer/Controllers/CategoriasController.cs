@@ -29,7 +29,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Filtrar por las categorías que no han sido eliminadas lógicamente
+            
             return await _context.Categorias
                                 .Where(c => c.Eliminado == false || c.Eliminado == null)
                                 .ToListAsync();
@@ -94,7 +94,7 @@ namespace JhiroServer.Controllers
                 return Problem("Entity set 'JhiroTiendaDBContext.Categorias'  is null.");
             }
 
-            categoria.Eliminado = false; // Asegurar que la categoría se crea como no eliminada
+            categoria.Eliminado = false;
             _context.Categorias.Add(categoria);
             await _context.SaveChangesAsync();
 
@@ -115,7 +115,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Eliminación lógica en lugar de eliminación física
+           
             categoria.Eliminado = true;
 
             _context.Entry(categoria).State = EntityState.Modified;
@@ -134,7 +134,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Restaurar la categoría
+            
             categoria.Eliminado = false;
             _context.Entry(categoria).State = EntityState.Modified;
             await _context.SaveChangesAsync();

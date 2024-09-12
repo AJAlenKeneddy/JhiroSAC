@@ -31,7 +31,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Filtrar por productos que no han sido eliminados lógicamente
+           
             return await _context.Productos
                                 .Where(p => !p.Eliminado)
                                 .ToListAsync();
@@ -46,7 +46,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Filtrar por productos que no han sido eliminados lógicamente
+            
             return await _context.Productos
                                 .Where(p => p.Eliminado)
                                 .ToListAsync();
@@ -61,7 +61,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Buscar producto por ID y verificar que no esté eliminado
+           
             var producto = await _context.Productos
                                           .Where(p => p.ProductoId == id && !p.Eliminado)
                                           .FirstOrDefaultAsync();
@@ -82,9 +82,9 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Buscar producto por ID y verificar que esté eliminado
+            
             var producto = await _context.Productos
-                                          .Where(p => p.ProductoId == id && p.Eliminado) // Suponiendo que 'Eliminado' es un bool
+                                          .Where(p => p.ProductoId == id && p.Eliminado) 
                                           .FirstOrDefaultAsync();
 
             if (producto == null)
@@ -150,7 +150,7 @@ namespace JhiroServer.Controllers
                 return Problem("Entity set 'JhiroTiendaDBContext.Productos' is null.");
             }
 
-            // Asegurar que el producto se crea como no eliminado
+            
             producto.Eliminado = false;
             _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
@@ -173,7 +173,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Eliminación lógica en lugar de eliminación física
+            
             producto.Eliminado = true;
 
             _context.Entry(producto).State = EntityState.Modified;
@@ -197,7 +197,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Restaurar el producto eliminado lógicamente
+            
             if (!producto.Eliminado)
             {
                 return BadRequest("El producto no está eliminado.");
@@ -249,7 +249,7 @@ namespace JhiroServer.Controllers
                     }
                 }
 
-                // Filtra los productos eliminados
+                
                 productos = productos.Where(p => !p.Eliminado).ToList();
 
                 if (productos.Count == 0)

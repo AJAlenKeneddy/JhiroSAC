@@ -50,7 +50,7 @@ namespace JhiroServer.Controllers
         }
 
         // PUT: api/Inventarios/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutInventario(int id, Inventario inventario)
         {
@@ -81,7 +81,7 @@ namespace JhiroServer.Controllers
         }
 
         // POST: api/Inventarios
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPost]
         public async Task<ActionResult<Inventario>> PostInventario(Inventario inventario)
         {
