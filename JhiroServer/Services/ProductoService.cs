@@ -16,18 +16,18 @@ namespace JhiroServer.Services
             _httpClient = httpClient;
         }
 
-        // Obtener todos los productos
+        
         public async Task<List<Producto>> GetProductosAsync()
         {
             try
             {
                 var productos = await _httpClient.GetFromJsonAsync<List<Producto>>("https://jhiro.somee.com/api/Productoes/obtenerProductos");
-                return productos ?? new List<Producto>(); // Retorna lista vacía si es null
+                return productos ?? new List<Producto>();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener productos: {ex.Message}");
-                return new List<Producto>(); // Retornar lista vacía en caso de error
+                return new List<Producto>(); 
             }
         }
 
@@ -39,13 +39,13 @@ namespace JhiroServer.Services
             {
                 var url = $"https://Jhiro.somee.com/api/Productoes/GetProductosPorCategoria?categoriaId={categoriaId}&pageNumber={pageNumber}";
                 var response = await _httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode(); // Lanza una excepción si el código de estado HTTP no es exitoso
+                response.EnsureSuccessStatusCode(); 
                 return await response.Content.ReadFromJsonAsync<List<Producto>>();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener productos por categoría: {ex.Message}");
-                return new List<Producto>(); // Retornar lista vacía en caso de error
+                return new List<Producto>(); 
             }
         }
 
@@ -59,7 +59,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener categoría: {ex.Message}");
-                return null; // Retornar null en caso de error
+                return null; 
             }
         }
 
@@ -73,7 +73,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener el producto: {ex.Message}");
-                return null; // Retornar null en caso de error
+                return null;
             }
         }
 
@@ -88,7 +88,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al crear el producto: {ex.Message}");
-                return false; // Retornar false en caso de error
+                return false; 
             }
         }
 
@@ -103,7 +103,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al actualizar el producto: {ex.Message}");
-                return false; // Retornar false en caso de error
+                return false; 
             }
         }
 
@@ -118,7 +118,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al eliminar el producto: {ex.Message}");
-                return false; // Retornar false en caso de error
+                return false; 
             }
         }
 
@@ -131,7 +131,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener productos eliminados: {ex.Message}");
-                return new List<Producto>(); // Retornar lista vacía en caso de error
+                return new List<Producto>(); 
             }
         }
 
@@ -146,7 +146,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al restaurar producto: {ex.Message}");
-                return false; // Retornar false en caso de error
+                return false; 
             }
         }
         public async Task<Producto> GetProductoEliminadoAsync(int id)
@@ -158,7 +158,7 @@ namespace JhiroServer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener producto eliminado: {ex.Message}");
-                return null; // Retornar null en caso de error
+                return null; 
             }
         }
 
