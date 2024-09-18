@@ -16,13 +16,33 @@ namespace JhiroServer.Models
         {
         }
 
+        public virtual DbSet<Carrito> Carritos { get; set; } = null!;
         public virtual DbSet<Categoria> Categorias { get; set; } = null!;
         public virtual DbSet<Inventario> Inventarios { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
+        public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
 
-  
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Carrito>(entity =>
+            {
+                entity.ToTable("Carrito");
+
+                entity.HasOne(d => d.Producto)
+                    .WithMany(p => p.Carritos)
+                    .HasForeignKey(d => d.ProductoId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Carrito__Product__5165187F");
+
+                entity.HasOne(d => d.Usuario)
+                    .WithMany(p => p.Carritos)
+                    .HasForeignKey(d => d.UsuarioId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Carrito__Usuario__5070F446");
+            });
+
             modelBuilder.Entity<Categoria>(entity =>
             {
                 entity.Property(e => e.Nombre).HasMaxLength(100);
@@ -43,7 +63,7 @@ namespace JhiroServer.Models
                 entity.HasOne(d => d.Producto)
                     .WithMany(p => p.Inventarios)
                     .HasForeignKey(d => d.ProductoId)
-                    .HasConstraintName("FK__Inventari__Produ__2A4B4B5E");
+                    .HasConstraintName("FK__Inventari__Produ__3E52440B");
             });
 
             modelBuilder.Entity<Producto>(entity =>
@@ -57,7 +77,14 @@ namespace JhiroServer.Models
                 entity.HasOne(d => d.Categoria)
                     .WithMany(p => p.Productos)
                     .HasForeignKey(d => d.CategoriaId)
-                    .HasConstraintName("FK__Productos__Categ__267ABA7A");
+                    .HasConstraintName("FK__Productos__Categ__3F466844");
+            });
+
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.Property(e => e.FechaRegistro)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
             });
 
             OnModelCreatingPartial(modelBuilder);

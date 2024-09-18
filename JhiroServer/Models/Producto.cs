@@ -8,6 +8,7 @@ namespace JhiroServer.Models
     {
         public Producto()
         {
+            Carritos = new HashSet<Carrito>();
             Inventarios = new HashSet<Inventario>();
         }
 
@@ -29,6 +30,7 @@ namespace JhiroServer.Models
         public bool Eliminado { get; set; }
 
         public virtual Categoria? Categoria { get; set; }
+        public virtual ICollection<Carrito> Carritos { get; set; }
         public virtual ICollection<Inventario> Inventarios { get; set; }
     }
 }
