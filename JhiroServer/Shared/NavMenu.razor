@@ -67,7 +67,7 @@
     private async Task CerrarSesion()
     {
         
-        var response = await Http.PostAsync("https://localhost:7048/api/Acceso/CerrarSesion", null);
+        var response = await Http.PostAsync("https://jhiro.somee.com/api/Acceso/CerrarSesion", null);
 
         if (response.IsSuccessStatusCode)
         {

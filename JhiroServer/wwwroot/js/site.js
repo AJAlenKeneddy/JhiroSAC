@@ -15,3 +15,5 @@ window.auth = {
         return localStorage.getItem("authToken");
     }
 };
+
+
