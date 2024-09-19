@@ -1,65 +1,69 @@
-﻿//// JwtService.cs
-//using System;
-//using System.IdentityModel.Tokens.Jwt;
-//using System.Security.Claims;
-//using System.Text;
-//using Microsoft.AspNetCore.Identity;
-//using Microsoft.Extensions.Configuration;
-//using Microsoft.IdentityModel.Tokens;
-//using JhiroServer.Models;
-//using JhiroServer.Services;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.JSInterop;
+using JhiroServer.Models;
+using JhiroServer.Services;
 
+public class JwtService : IJwtService
+{
+    private readonly IConfiguration _configuration;
+    private readonly IJSRuntime _jsRuntime;
 
+    public JwtService(IConfiguration configuration, IJSRuntime jsRuntime)
+    {
+        _configuration = configuration;
+        _jsRuntime = jsRuntime;
+    }
 
-//public class JwtService : IJwtService
-//{
-//    private readonly IConfiguration _configuration;
+    public string GenerateToken(Usuario usuario)
+    {
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, usuario.Correo),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("userId", usuario.UsuarioId.ToString()) // Asegúrate de que el ID de usuario se incluya en el token
+        };
 
-//    public JwtService(IConfiguration configuration)
-//    {
-//        _configuration = configuration;
-//    }
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-//    public string GenerateToken(Usuario usuario)
-//    {
-//        var claims = new[]
-//        {
-//        new Claim(JwtRegisteredClaimNames.Sub, usuario.NombreUsuario),
-//        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-//        new Claim("UserCredId", usuario.UsuarioId.ToString())
-//    };
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(30),
+            signingCredentials: creds);
 
-//        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-//        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
 
-//        var token = new JwtSecurityToken(
-//            issuer: _configuration["Jwt:Issuer"],
-//            audience: _configuration["Jwt:Audience"],
-//            claims: claims,
-//            expires: DateTime.UtcNow.AddDays(30),
-//            signingCredentials: creds);
+    public string GetUserIdFromToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        try
+        {
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            return userId;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
-//        return new JwtSecurityTokenHandler().WriteToken(token);
-//    }
+    public async Task<string> GetTokenAsync()
+    {
+        // Obtener el token del localStorage
+        var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
 
-
-//    public string GetUserIdFromToken(string token)
-//    {
-//        var tokenHandler = new JwtSecurityTokenHandler();
-//        try
-//        {
-//            var jwtToken = tokenHandler.ReadJwtToken(token);
-//            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserCredId")?.Value;
-//            return userId;
-//        }
-//        catch
-//        {
-//            return null;
-//        }
-
-
-
-
-//    }
-//}
-
+        // Retornar el token obtenido
+        return token;
+    }
+}
