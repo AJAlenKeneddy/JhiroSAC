@@ -1,123 +1,128 @@
 ﻿@page "/carrito"
-@inject CarritoService CarritoService
+@inject ILocalStorageService LocalStorage
 @inject IJwtService JwtService
+@inject NavigationManager NavigationManager
 @using JhiroServer.Services
 @using JhiroServer.Models
-@inject NavigationManager NavigationManager
+@using Blazored.LocalStorage
+@inject IJSRuntime JsRuntime
 
 
-@using JhiroServer.Models
-@using Microsoft.JSInterop
 
 @code {
     private List<CarritoDTO> carritos = new();
+    private List<CarritoDTO> productosEliminados = new();
     private bool isLoading = true;
     private string errorMessage;
-    private string token;
-    private bool isNavigatedToCarrito;
+    private string mensajeRecuperado;
+    private string mensajeEliminadoPermanente;
 
     protected override async Task OnInitializedAsync()
     {
-        
-        isLoading = true;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            
-            if (NavigationManager.Uri.EndsWith("/carrito", StringComparison.OrdinalIgnoreCase))
-            {
-                isNavigatedToCarrito = true;
-
-                token = await JwtService.GetTokenAsync();
-
-                if (string.IsNullOrEmpty(token))
-                {
-                    
-                    NavigationManager.NavigateTo("/login");
-                }
-                else
-                {
-                    
-                    await CargarCarrito();
-                }
-            }
-
-            StateHasChanged(); 
-        }
+        await CargarCarrito();
+        await CargarProductosEliminados();
+        isLoading = false; // Cambiado aquí para que solo se ejecute al final
     }
 
     private async Task CargarCarrito()
     {
-        if (!isNavigatedToCarrito) return;
-
         try
         {
-            
-            var carritosEnumerable = await CarritoService.GetCarritoByUsuarioId();
-            carritos = carritosEnumerable.ToList();
-
-            if (carritos == null || !carritos.Any())
-            {
-                errorMessage = "No tienes ningún producto en el carrito.";
-            }
+            carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error al cargar el carrito: {ex.Message}";
+            errorMessage = $"";
         }
-        finally
+    }
+
+    private async Task CargarProductosEliminados()
+    {
+        try
         {
-            isLoading = false;
+            productosEliminados = await LocalStorage.GetItemAsync<List<CarritoDTO>>("productosEliminados") ?? new List<CarritoDTO>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"";
         }
     }
 
     private async Task ActualizarCantidad(int productoId, int nuevaCantidad)
     {
-        try
+        if (nuevaCantidad < 1)
         {
-            if (nuevaCantidad < 1)
-            {
-                errorMessage = "La cantidad debe ser mayor a 0.";
-                return;
-            }
-
-            bool exito = await CarritoService.ActualizarCantidad(productoId, nuevaCantidad);
-            if (exito)
-            {
-                await CargarCarrito();
-            }
-            else
-            {
-                errorMessage = "Error al actualizar la cantidad.";
-            }
+            errorMessage = "La cantidad debe ser mayor a 0.";
+            return;
         }
-        catch (Exception ex)
+
+        var item = carritos.FirstOrDefault(c => c.ProductoId == productoId);
+        if (item != null)
         {
-            errorMessage = $"Error al actualizar la cantidad: {ex.Message}";
+            item.Cantidad = nuevaCantidad;
+            await ActualizarCarritoEnLocalStorage();
         }
     }
 
     private async Task EliminarProducto(int productoId)
     {
-        try
+        var productoEliminado = carritos.FirstOrDefault(c => c.ProductoId == productoId);
+        if (productoEliminado != null)
         {
-            bool exito = await CarritoService.EliminarProductoDelCarrito(productoId);
-            if (exito)
-            {
-                await CargarCarrito();
-            }
-            else
-            {
-                errorMessage = "Error al eliminar el producto.";
-            }
+            carritos.RemoveAll(c => c.ProductoId == productoId);
+            productosEliminados.Add(productoEliminado);
+            mensajeRecuperado = $"{productoEliminado.NombreProducto} ha sido eliminado del carrito.";
+            await ActualizarCarritoEnLocalStorage();
+            await ActualizarProductosEliminadosEnLocalStorage();
         }
-        catch (Exception ex)
+    }
+
+    private async Task EliminarPermanente(int productoId)
+    {
+        var productoEliminado = productosEliminados.FirstOrDefault(c => c.ProductoId == productoId);
+        if (productoEliminado != null)
         {
-            errorMessage = $"Error al eliminar el producto: {ex.Message}";
+            productosEliminados.Remove(productoEliminado);
+            mensajeEliminadoPermanente = $"{productoEliminado.NombreProducto} ha sido eliminado permanentemente.";
+            await ActualizarProductosEliminadosEnLocalStorage();
         }
+    }
+
+    private async Task RecuperarProducto(int productoId)
+    {
+        var productoRecuperado = productosEliminados.FirstOrDefault(c => c.ProductoId == productoId);
+        if (productoRecuperado != null)
+        {
+            carritos.Add(productoRecuperado);
+            productosEliminados.Remove(productoRecuperado);
+            mensajeRecuperado = $"{productoRecuperado.NombreProducto} ha sido recuperado al carrito.";
+            await ActualizarCarritoEnLocalStorage();
+            await ActualizarProductosEliminadosEnLocalStorage();
+        }
+    }
+
+    private async Task ActualizarCarritoEnLocalStorage()
+    {
+        await LocalStorage.SetItemAsync("carrito", carritos);
+    }
+
+    private async Task ActualizarProductosEliminadosEnLocalStorage()
+    {
+        await LocalStorage.SetItemAsync("productosEliminados", productosEliminados);
+    }
+    private async Task ShowModal(string imageUrl)
+    {
+        await JsRuntime.InvokeVoidAsync("setImageModalSrc", imageUrl);
+        await JsRuntime.InvokeVoidAsync("showImageModal");
+    }
+
+    private async Task CloseModal()
+    {
+        await JsRuntime.InvokeVoidAsync("hideImageModal");
+    }
+    private async Task IrAPagar()
+    {
+         NavigationManager.NavigateTo("/pago");
     }
 }
 
@@ -125,31 +130,82 @@
 {
     <p>Cargando...</p>
 }
-else if (!string.IsNullOrEmpty(errorMessage))
-{
-    <p>@errorMessage</p>
-}
 else
 {
-    <ul class="list-unstyled">
-        @foreach (var item in carritos)
-        {
-            <li class="mb-3">
-                <div class="d-flex align-items-center">
-                    <img src="@item.ImagenUrl" alt="@item.NombreProducto" style="width: 50px; height: 50px; object-fit: cover;" class="me-3" />
-                    <div>
-                        <strong>@item.NombreProducto</strong><br />
-                        <span>Precio Unitario: @item.PrecioProducto</span><br />
-                        <span>Cantidad: @item.Cantidad</span>
-                        <div>
-                            <button class="btn btn-sm btn-secondary me-2" @onclick="() => ActualizarCantidad(item.ProductoId, item.Cantidad + 1)">+</button>
-                            <button class="btn btn-sm btn-secondary me-2" @onclick="() => ActualizarCantidad(item.ProductoId, item.Cantidad - 1)">-</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarProducto(item.ProductoId)">Eliminar</button>
+    if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="text-danger">@errorMessage</p>
+    }
+
+    if (!string.IsNullOrEmpty(mensajeRecuperado))
+    {
+        <p class="text-success">@mensajeRecuperado</p>
+    }
+
+    if (!string.IsNullOrEmpty(mensajeEliminadoPermanente))
+    {
+        <p class="text-danger">@mensajeEliminadoPermanente</p>
+    }
+
+    if (!carritos.Any())
+    {
+        <p>No tienes ningún producto en el carrito.</p>
+    }
+    else
+    {
+        <div class="container">
+            <div class="row">
+                @foreach (var item in carritos)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card product-card shadow-sm border-light rounded">
+                            <img src="@item.ImagenUrl" class="card-img-top" alt="@item.NombreProducto" style="cursor:pointer;" @onclick="() => ShowModal(item.ImagenUrl)" />
+                            <div class="card-body text-center">
+                                <h5 class="card-title">@item.NombreProducto</h5>
+                                <p class="card-text">Precio Unitario: @item.PrecioProducto.ToString("C")</p>
+                                <p class="card-text">Cantidad: @item.Cantidad</p>
+                                <div>
+                                    <button class="btn btn-sm btn-secondary me-2" @onclick="() => ActualizarCantidad(item.ProductoId, item.Cantidad + 1)">+</button>
+                                    <button class="btn btn-sm btn-secondary me-2" @onclick="() => ActualizarCantidad(item.ProductoId, item.Cantidad - 1)">-</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => EliminarProducto(item.ProductoId)">Eliminar</button>
+                                </div>
+                                <span><strong>Precio Total: @($"{item.Cantidad * item.PrecioProducto:C}")</strong></span>
+                            </div>
                         </div>
-                        <span><strong>Precio Total: @($"{item.Cantidad * item.PrecioProducto}")</strong></span>
                     </div>
-                </div>
-            </li>
-        }
-    </ul>
+                }
+            </div>
+        </div>
+        <br />
+        <Button Class="btn btn-success" @onclick="()=> IrAPagar()">Realizar Pago</Button>
+        <br />
+        <br />
+    }
+
+    if (productosEliminados.Any())
+    {
+        <h5>Productos Eliminados</h5>
+        <ul class="list-unstyled">
+            @foreach (var item in productosEliminados)
+            {
+                <li class="mb-3">
+                    <div class="d-flex align-items-center">
+                        <img src="@item.ImagenUrl" alt="@item.NombreProducto" style="width: 50px; height: 50px; object-fit: cover;" class="me-3" />
+                        <div>
+                            <strong>@item.NombreProducto</strong><br />
+                            <span>Precio: @item.PrecioProducto.ToString("C")</span>
+                            <button class="btn btn-sm btn-success" @onclick="() => RecuperarProducto(item.ProductoId)">Recuperar</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarPermanente(item.ProductoId)">Eliminar Permanentemente</button>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
 }
+<div id="imageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" @onclick="CloseModal">&times;</span>
+        <img id="modalImage" src="" alt="Imagen en grande">
+    </div>
+</div>
