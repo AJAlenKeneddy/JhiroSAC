@@ -1,10 +1,21 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">JhiroServer</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
+﻿
+
+@using Blazored.LocalStorage
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <Dropdown Color="DropdownColor.Secondary">
+        <DropdownToggleButton>
+            <i class="fas fa-user"></i> <!-- FontAwesome user icon -->
+        </DropdownToggleButton>
+        <DropdownMenu>
+            <DropdownItem To="/login" Type="DropdownItemType.Link">Login</DropdownItem>
+            <DropdownItem To="/register" Type="DropdownItemType.Link">Register</DropdownItem>
+            <DropdownItem @onclick="CerrarSesion" Type="DropdownItemType.Button">Cerrar Sesión</DropdownItem>
+        </DropdownMenu>
+    </Dropdown>
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
@@ -15,28 +26,33 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="polos">
+            <NavLink class="nav-link" href="/carrito" Match="NavLinkMatch.All">
+                <span class="oi oi-cart" aria-hidden="true"></span> Carrito
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/polos">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Polos
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="camisas">
+            <NavLink class="nav-link" href="/camisas">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Camisas
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="pantalones">
+            <NavLink class="nav-link" href="/pantalones">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Pantalones
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="casacas">
+            <NavLink class="nav-link" href="/casacas">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Casacas
             </NavLink>
         </div>
     </nav>
 </div>
-
 
 @code {
     private bool collapseNavMenu = true;
@@ -46,5 +62,25 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task CerrarSesion()
+    {
+        // Llama al endpoint de cierre de sesión
+        var response = await Http.PostAsync("https://localhost:7048/api/Acceso/CerrarSesion", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Elimina el token de localStorage
+            await LocalStorage.RemoveItemAsync("authToken");
+
+            // Redirige a la página de inicio de sesión
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            // Manejar error de cierre de sesión
+            Console.WriteLine("Error al cerrar sesión.");
+        }
     }
 }
