@@ -396,7 +396,7 @@ namespace JhiroServer.Controllers
 
 
         [HttpPost]
-        
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Route("CerrarSesion")]
         public IActionResult CerrarSesion()
         {

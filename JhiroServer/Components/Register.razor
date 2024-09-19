@@ -52,7 +52,7 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("https://localhost:7048/api/Acceso/Registrarse", registroModel);
+            var response = await Http.PostAsJsonAsync("https://jhiro.somee.com/api/Acceso/Registrarse", registroModel);
             var result = await response.Content.ReadFromJsonAsync<Response<string>>();
 
             if (result.IsSuccess)
