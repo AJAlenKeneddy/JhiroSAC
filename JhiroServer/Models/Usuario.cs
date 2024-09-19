@@ -12,6 +12,7 @@ namespace JhiroServer.Models
 
         public int UsuarioId { get; set; }
         public DateTime? FechaRegistro { get; set; }
+        public string Correo { get; set; } = null!;
 
         public virtual ICollection<Carrito> Carritos { get; set; }
     }

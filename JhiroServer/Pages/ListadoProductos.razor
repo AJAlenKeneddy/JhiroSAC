@@ -1,7 +1,12 @@
 ﻿@page "/productos/{CategoriaId:int}"
 @using JhiroServer.Services
-@inject ProductoService ProductoService
 @using JhiroServer.Models
+@using Blazored.LocalStorage
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+@inject ProductoService ProductoService
+@inject CarritoService CarritoService
+@inject NavigationManager NavigationManager
 
 @if (Categoria == null)
 {
@@ -23,7 +28,6 @@ else
     else
     {
         <div class="container">
-            
             @foreach (var row in GetRows(productos))
             {
                 <div class="row">
@@ -37,7 +41,7 @@ else
                                     <p class="card-text">@producto.Descripcion</p>
                                     <p class="card-text font-weight-bold">Precio: @producto.Precio.ToString("C")</p>
                                     <p class="card-text text-muted">Stock: @producto.Stock</p>
-                                    <a href="#" class="btn btn-primary">Comprar Ahora</a>
+                                    <button class="btn btn-primary" @onclick="() => AgregarAlCarrito(producto.ProductoId)">Agregar al Carrito</button>
                                 </div>
                             </div>
                         </div>
@@ -45,7 +49,6 @@ else
                 </div>
             }
 
-            
             <div class="d-flex justify-content-between mt-3">
                 <button @onclick="PreviousPage" class="btn btn-secondary" disabled="@(pageNumber == 1)">Anterior</button>
                 <span class="align-self-center">Página @pageNumber</span>
@@ -56,7 +59,7 @@ else
 }
 
 @code {
-    [Parameter] 
+    [Parameter]
     public int CategoriaId { get; set; }
     private List<Producto> productos;
     private Categoria Categoria;
@@ -67,15 +70,61 @@ else
     {
         try
         {
-            
             productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
-
-            
             Categoria = await ProductoService.GetCategoriaAsync(CategoriaId);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al inicializar datos: {ex.Message}");
+        }
+    }
+
+    private async Task AgregarAlCarrito(int productoId)
+    {
+        var authToken = await LocalStorage.GetItemAsync<string>("authToken");
+        if (string.IsNullOrEmpty(authToken))
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            // Obtener el carrito del usuario para verificar si el producto ya existe
+            var carrito = await CarritoService.GetCarritoByUsuarioId();
+            var itemEnCarrito = carrito.FirstOrDefault(c => c.ProductoId == productoId);
+
+            if (itemEnCarrito != null)
+            {
+                // Si el producto ya está en el carrito, actualizamos la cantidad
+                var nuevaCantidad = itemEnCarrito.Cantidad + 1; // Aquí añadimos 1 a la cantidad existente
+                var actualizarCantidadExito = await CarritoService.ActualizarCantidad(productoId, nuevaCantidad);
+                if (actualizarCantidadExito)
+                {
+                    Console.WriteLine("Cantidad actualizada en el carrito.");
+                }
+                else
+                {
+                    Console.WriteLine("Error al actualizar la cantidad.");
+                }
+            }
+            else
+            {
+                // Si el producto no está en el carrito, lo agregamos con una cantidad de 1
+                var exitoAgregar = await CarritoService.AddToCarrito(productoId, 1);
+                if (exitoAgregar)
+                {
+                    Console.WriteLine("Producto agregado al carrito.");
+                }
+                else
+                {
+                    Console.WriteLine("Error al agregar producto al carrito.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al manejar el carrito: {ex.Message}");
         }
     }
 
@@ -98,10 +147,7 @@ else
     {
         try
         {
-            
             productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
-
-           
             Categoria = await ProductoService.GetCategoriaAsync(CategoriaId);
         }
         catch (Exception ex)
@@ -112,7 +158,6 @@ else
 
     private IEnumerable<IEnumerable<Producto>> GetRows(List<Producto> productos)
     {
-       
         for (int i = 0; i < productos.Count; i += 3)
         {
             yield return productos.Skip(i).Take(3);
