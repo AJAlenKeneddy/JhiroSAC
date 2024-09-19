@@ -90,14 +90,14 @@ else
 
         try
         {
-            // Obtener el carrito del usuario para verificar si el producto ya existe
+            
             var carrito = await CarritoService.GetCarritoByUsuarioId();
             var itemEnCarrito = carrito.FirstOrDefault(c => c.ProductoId == productoId);
 
             if (itemEnCarrito != null)
             {
-                // Si el producto ya está en el carrito, actualizamos la cantidad
-                var nuevaCantidad = itemEnCarrito.Cantidad + 1; // Aquí añadimos 1 a la cantidad existente
+               
+                var nuevaCantidad = itemEnCarrito.Cantidad + 1; 
                 var actualizarCantidadExito = await CarritoService.ActualizarCantidad(productoId, nuevaCantidad);
                 if (actualizarCantidadExito)
                 {
@@ -110,7 +110,7 @@ else
             }
             else
             {
-                // Si el producto no está en el carrito, lo agregamos con una cantidad de 1
+               
                 var exitoAgregar = await CarritoService.AddToCarrito(productoId, 1);
                 if (exitoAgregar)
                 {

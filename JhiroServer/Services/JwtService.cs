@@ -27,7 +27,7 @@ public class JwtService : IJwtService
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Correo),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("userId", usuario.UsuarioId.ToString()) // Asegúrate de que el ID de usuario se incluya en el token
+            new Claim("userId", usuario.UsuarioId.ToString()) 
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -60,10 +60,10 @@ public class JwtService : IJwtService
 
     public async Task<string> GetTokenAsync()
     {
-        // Obtener el token del localStorage
+      
         var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
 
-        // Retornar el token obtenido
+        
         return token;
     }
 }

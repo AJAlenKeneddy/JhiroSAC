@@ -18,7 +18,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Solo inicializa el componente sin hacer llamadas de JavaScript.
+        
         isLoading = true;
     }
 
@@ -26,27 +26,26 @@
     {
         if (firstRender)
         {
-            // Verifica si la URL actual es la página "/carrito"
+            
             if (NavigationManager.Uri.EndsWith("/carrito", StringComparison.OrdinalIgnoreCase))
             {
                 isNavigatedToCarrito = true;
 
-                // Obtén el token después de que el componente haya sido renderizado en el cliente.
                 token = await JwtService.GetTokenAsync();
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    // Redirige a la página de inicio de sesión si el token es null o vacío.
+                    
                     NavigationManager.NavigateTo("/login");
                 }
                 else
                 {
-                    // Carga el carrito solo si el token es válido.
+                    
                     await CargarCarrito();
                 }
             }
 
-            StateHasChanged(); // Actualiza el estado del componente después de redirigir o cargar el carrito.
+            StateHasChanged(); 
         }
     }
 
@@ -56,9 +55,9 @@
 
         try
         {
-            // Carga los datos del carrito solo si no hay error y el componente está cargado.
+            
             var carritosEnumerable = await CarritoService.GetCarritoByUsuarioId();
-            carritos = carritosEnumerable.ToList(); // Conversión explícita a List<CarritoDTO>
+            carritos = carritosEnumerable.ToList();
 
             if (carritos == null || !carritos.Any())
             {
@@ -88,7 +87,7 @@
             bool exito = await CarritoService.ActualizarCantidad(productoId, nuevaCantidad);
             if (exito)
             {
-                await CargarCarrito(); // Recargar el carrito actualizado
+                await CargarCarrito();
             }
             else
             {
@@ -108,7 +107,7 @@
             bool exito = await CarritoService.EliminarProductoDelCarrito(productoId);
             if (exito)
             {
-                await CargarCarrito(); // Recargar el carrito después de eliminar
+                await CargarCarrito();
             }
             else
             {

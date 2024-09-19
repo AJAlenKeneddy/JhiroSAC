@@ -60,7 +60,7 @@ namespace JhiroServer.Controllers
                     });
                 }
 
-                // Generación del código de verificación
+               
                 var codigoVerificacion = new Random().Next(10000, 99999).ToString();
 
 
@@ -112,7 +112,7 @@ namespace JhiroServer.Controllers
             }
             catch (Exception ex)
             {
-                // Manejo de cualquier otra excepción
+                
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     IsSuccess = false,

@@ -22,7 +22,7 @@ namespace JhiroServer.Controllers
             _context = context;
         }
 
-        // GET: api/Productoes
+        
         [HttpGet("obtenerProductos")]
         public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
         {
@@ -52,7 +52,7 @@ namespace JhiroServer.Controllers
                                 .ToListAsync();
         }
 
-        // GET: api/Productoes/5
+    
         [HttpGet("UnProducto/{id}")]
         public async Task<ActionResult<Producto>> GetProducto(int id)
         {
@@ -96,7 +96,7 @@ namespace JhiroServer.Controllers
         }
 
 
-        // PUT: api/Productoes/5
+      
         [HttpPut("ActualizarProducto/{id}")]
         public async Task<IActionResult> PutProducto(int id, Producto producto)
         {
@@ -111,7 +111,7 @@ namespace JhiroServer.Controllers
                 return NotFound();
             }
 
-            // Actualizar el producto
+            
             existingProducto.Nombre = producto.Nombre;
             existingProducto.Descripcion = producto.Descripcion;
             existingProducto.Precio = producto.Precio;
@@ -141,7 +141,7 @@ namespace JhiroServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Productoes
+     
         [HttpPost("CrearProducto")]
         public async Task<ActionResult<Producto>> PostProducto(Producto producto)
         {
@@ -158,7 +158,7 @@ namespace JhiroServer.Controllers
             return CreatedAtAction("GetProducto", new { id = producto.ProductoId }, producto);
         }
 
-        // DELETE: api/Productoes/5
+    
         [HttpDelete("EliminarProducto/{id}")]
         public async Task<IActionResult> DeleteProducto(int id)
         {
@@ -182,7 +182,7 @@ namespace JhiroServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Productoes/restore/5
+     
         [HttpPost("RestaurarProducto/{id}")]
         public async Task<IActionResult> RestoreProducto(int id)
         {
@@ -210,7 +210,7 @@ namespace JhiroServer.Controllers
             return NoContent();
         }
 
-        // GET: api/Productoes/GetProductosPorCategoria
+       
         [HttpGet("GetProductosPorCategoria")]
         public async Task<IActionResult> GetProductosPorCategoria(int categoriaId, int pageNumber = 1)
         {

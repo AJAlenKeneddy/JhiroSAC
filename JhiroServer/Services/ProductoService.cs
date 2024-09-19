@@ -32,7 +32,7 @@ namespace JhiroServer.Services
         }
 
 
-        // Obtener productos por categoría
+       
         public async Task<List<Producto>> GetProductosPorCategoriaAsync(int categoriaId, int pageNumber)
         {
             try
@@ -49,7 +49,7 @@ namespace JhiroServer.Services
             }
         }
 
-        // Obtener una categoría por su ID
+       
         public async Task<Categoria> GetCategoriaAsync(int categoriaId)
         {
             try
@@ -63,7 +63,7 @@ namespace JhiroServer.Services
             }
         }
 
-        // Obtener un producto por su ID
+        
         public async Task<Producto> GetProductoByIdAsync(int productoId)
         {
             try
@@ -77,7 +77,6 @@ namespace JhiroServer.Services
             }
         }
 
-        // Crear un nuevo producto
         public async Task<bool> CreateProductoAsync(Producto nuevoProducto)
         {
             try
@@ -92,7 +91,7 @@ namespace JhiroServer.Services
             }
         }
 
-        // Actualizar un producto existente
+       
         public async Task<bool> UpdateProductoAsync(Producto productoActualizado)
         {
             try
@@ -107,7 +106,7 @@ namespace JhiroServer.Services
             }
         }
 
-        // Eliminar un producto por su ID
+       
         public async Task<bool> DeleteProductoAsync(int productoId)
         {
             try

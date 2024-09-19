@@ -20,7 +20,6 @@ namespace JhiroServer.Controllers
             _context = context;
         }
 
-        // GET: api/Categorias
         [HttpGet("ListadoCategorias")]
         public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias()
         {
@@ -35,7 +34,7 @@ namespace JhiroServer.Controllers
                                 .ToListAsync();
         }
 
-        // GET: api/Categorias/5
+        
         [HttpGet("Categoria/{id}")]
         public async Task<ActionResult<Categoria>> GetCategoria(int id)
         {
@@ -55,7 +54,7 @@ namespace JhiroServer.Controllers
             return categoria;
         }
 
-        // PUT: api/Categorias/5
+        
         [HttpPut("ActualizarCategoria/{id}")]
         public async Task<IActionResult> PutCategoria(int id, Categoria categoria)
         {
@@ -85,7 +84,7 @@ namespace JhiroServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Categorias
+        
         [HttpPost("CrearCategoria")]
         public async Task<ActionResult<Categoria>> PostCategoria(Categoria categoria)
         {
@@ -101,7 +100,7 @@ namespace JhiroServer.Controllers
             return CreatedAtAction("GetCategoria", new { id = categoria.CategoriaId }, categoria);
         }
 
-        // DELETE: api/Categorias/5
+        
         [HttpDelete("EliminarCategoria/{id}")]
         public async Task<IActionResult> DeleteCategoria(int id)
         {
@@ -124,7 +123,7 @@ namespace JhiroServer.Controllers
             return NoContent();
         }
 
-        // RESTORE: api/Categorias/5
+        
         [HttpPut("RestaurarCategoria/{id}")]
         public async Task<IActionResult> RestaurarCategoria(int id)
         {

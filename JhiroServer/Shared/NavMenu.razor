@@ -8,7 +8,7 @@
 <div class="top-row ps-3 navbar navbar-dark">
     <Dropdown Color="DropdownColor.Secondary">
         <DropdownToggleButton>
-            <i class="fas fa-user"></i> <!-- FontAwesome user icon -->
+            <i class="fas fa-user"></i> 
         </DropdownToggleButton>
         <DropdownMenu>
             <DropdownItem To="/login" Type="DropdownItemType.Link">Login</DropdownItem>
@@ -66,20 +66,20 @@
 
     private async Task CerrarSesion()
     {
-        // Llama al endpoint de cierre de sesión
+        
         var response = await Http.PostAsync("https://localhost:7048/api/Acceso/CerrarSesion", null);
 
         if (response.IsSuccessStatusCode)
         {
-            // Elimina el token de localStorage
+            
             await LocalStorage.RemoveItemAsync("authToken");
 
-            // Redirige a la página de inicio de sesión
+           
             NavigationManager.NavigateTo("/login");
         }
         else
         {
-            // Manejar error de cierre de sesión
+            
             Console.WriteLine("Error al cerrar sesión.");
         }
     }

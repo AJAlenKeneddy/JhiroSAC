@@ -20,7 +20,7 @@ namespace JhiroServer.Controllers
             _context = context;
         }
 
-        // GET: api/Inventarios
+       
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Inventario>>> GetInventarios()
         {
@@ -31,7 +31,7 @@ namespace JhiroServer.Controllers
             return await _context.Inventarios.ToListAsync();
         }
 
-        // GET: api/Inventarios/5
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<Inventario>> GetInventario(int id)
         {
@@ -49,7 +49,7 @@ namespace JhiroServer.Controllers
             return inventario;
         }
 
-        // PUT: api/Inventarios/5
+      
         
         [HttpPut("{id}")]
         public async Task<IActionResult> PutInventario(int id, Inventario inventario)
@@ -80,7 +80,7 @@ namespace JhiroServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Inventarios
+        
         
         [HttpPost]
         public async Task<ActionResult<Inventario>> PostInventario(Inventario inventario)
@@ -95,7 +95,7 @@ namespace JhiroServer.Controllers
             return CreatedAtAction("GetInventario", new { id = inventario.InventarioId }, inventario);
         }
 
-        // DELETE: api/Inventarios/5
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInventario(int id)
         {

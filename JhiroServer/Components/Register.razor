@@ -37,9 +37,9 @@
     private string? message;
     private string messageClass = "";
     private bool registroExitoso = false;
-    private bool verificacionExitoso = false; // Indica si la verificación fue exitosa
+    private bool verificacionExitoso = false;
 
-    private bool showPassword = false; // Controla la visibilidad de la contraseña
+    private bool showPassword = false;
     private string passwordType => showPassword ? "text" : "password";
     private string passwordIcon => showPassword ? "bi bi-eye-slash" : "bi bi-eye";
 
@@ -57,14 +57,14 @@
 
             if (result.IsSuccess)
             {
-                registroExitoso = true; // Indica que el registro fue exitoso
+                registroExitoso = true; 
                 message = result.Message;
                 messageClass = "alert-success";
                
             }
             else
             {
-                message = result.Message; // Muestra el mensaje de error del API
+                message = result.Message; 
                 messageClass = "alert-danger";
             }
         }
