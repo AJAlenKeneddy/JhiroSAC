@@ -1,0 +1,156 @@
+﻿@page "/carrito"
+@inject CarritoService CarritoService
+@inject IJwtService JwtService
+@using JhiroServer.Services
+@using JhiroServer.Models
+@inject NavigationManager NavigationManager
+
+
+@using JhiroServer.Models
+@using Microsoft.JSInterop
+
+@code {
+    private List<CarritoDTO> carritos = new();
+    private bool isLoading = true;
+    private string errorMessage;
+    private string token;
+    private bool isNavigatedToCarrito;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Solo inicializa el componente sin hacer llamadas de JavaScript.
+        isLoading = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Verifica si la URL actual es la página "/carrito"
+            if (NavigationManager.Uri.EndsWith("/carrito", StringComparison.OrdinalIgnoreCase))
+            {
+                isNavigatedToCarrito = true;
+
+                // Obtén el token después de que el componente haya sido renderizado en el cliente.
+                token = await JwtService.GetTokenAsync();
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    // Redirige a la página de inicio de sesión si el token es null o vacío.
+                    NavigationManager.NavigateTo("/login");
+                }
+                else
+                {
+                    // Carga el carrito solo si el token es válido.
+                    await CargarCarrito();
+                }
+            }
+
+            StateHasChanged(); // Actualiza el estado del componente después de redirigir o cargar el carrito.
+        }
+    }
+
+    private async Task CargarCarrito()
+    {
+        if (!isNavigatedToCarrito) return;
+
+        try
+        {
+            // Carga los datos del carrito solo si no hay error y el componente está cargado.
+            var carritosEnumerable = await CarritoService.GetCarritoByUsuarioId();
+            carritos = carritosEnumerable.ToList(); // Conversión explícita a List<CarritoDTO>
+
+            if (carritos == null || !carritos.Any())
+            {
+                errorMessage = "No tienes ningún producto en el carrito.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar el carrito: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ActualizarCantidad(int productoId, int nuevaCantidad)
+    {
+        try
+        {
+            if (nuevaCantidad < 1)
+            {
+                errorMessage = "La cantidad debe ser mayor a 0.";
+                return;
+            }
+
+            bool exito = await CarritoService.ActualizarCantidad(productoId, nuevaCantidad);
+            if (exito)
+            {
+                await CargarCarrito(); // Recargar el carrito actualizado
+            }
+            else
+            {
+                errorMessage = "Error al actualizar la cantidad.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al actualizar la cantidad: {ex.Message}";
+        }
+    }
+
+    private async Task EliminarProducto(int productoId)
+    {
+        try
+        {
+            bool exito = await CarritoService.EliminarProductoDelCarrito(productoId);
+            if (exito)
+            {
+                await CargarCarrito(); // Recargar el carrito después de eliminar
+            }
+            else
+            {
+                errorMessage = "Error al eliminar el producto.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al eliminar el producto: {ex.Message}";
+        }
+    }
+}
+
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p>@errorMessage</p>
+}
+else
+{
+    <ul class="list-unstyled">
+        @foreach (var item in carritos)
+        {
+            <li class="mb-3">
+                <div class="d-flex align-items-center">
+                    <img src="@item.ImagenUrl" alt="@item.NombreProducto" style="width: 50px; height: 50px; object-fit: cover;" class="me-3" />
+                    <div>
+                        <strong>@item.NombreProducto</strong><br />
+                        <span>Precio Unitario: @item.PrecioProducto</span><br />
+                        <span>Cantidad: @item.Cantidad</span>
+                        <div>
+                            <button class="btn btn-sm btn-secondary me-2" @onclick="() => ActualizarCantidad(item.ProductoId, item.Cantidad + 1)">+</button>
+                            <button class="btn btn-sm btn-secondary me-2" @onclick="() => ActualizarCantidad(item.ProductoId, item.Cantidad - 1)">-</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarProducto(item.ProductoId)">Eliminar</button>
+                        </div>
+                        <span><strong>Precio Total: @($"{item.Cantidad * item.PrecioProducto}")</strong></span>
+                    </div>
+                </div>
+            </li>
+        }
+    </ul>
+}

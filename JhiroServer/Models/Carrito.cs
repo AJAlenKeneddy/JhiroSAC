@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace JhiroServer.Models
 {
     public partial class Carrito
     {
-        public int CarritoId { get; set; }
+        [Key]
         public int UsuarioId { get; set; }
         public int ProductoId { get; set; }
         public int Cantidad { get; set; }
 
-        public virtual Producto Producto { get; set; } = null!;
-        public virtual Usuario Usuario { get; set; } = null!;
+        public virtual Producto Producto { get; set; }
+        public virtual Usuario Usuario { get; set; }
     }
+
 }
