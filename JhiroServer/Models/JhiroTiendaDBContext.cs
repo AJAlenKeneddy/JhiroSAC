@@ -22,10 +22,13 @@ namespace JhiroServer.Models
         public virtual DbSet<Producto> Productos { get; set; } = null!;
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
 
+        public virtual DbSet<CarritoSPResult>CarritoSPResults { get; set; } = null!;
 
+        public virtual DbSet<EliminarProductoCarritoResult>EliminarProductoCarritoResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<EliminarProductoCarritoResult>().HasNoKey();
             modelBuilder.Entity<Carrito>(entity =>
             {
                 entity.ToTable("Carrito");
@@ -82,6 +85,10 @@ namespace JhiroServer.Models
 
             modelBuilder.Entity<Usuario>(entity =>
             {
+                entity.Property(e => e.Correo)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.FechaRegistro)
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
