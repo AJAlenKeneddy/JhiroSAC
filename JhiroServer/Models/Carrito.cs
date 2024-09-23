@@ -5,6 +5,11 @@ namespace JhiroServer.Models
 {
     public partial class Carrito
     {
+        public Carrito()
+        {
+            OrdenProductos = new HashSet<OrdenProducto>();
+        }
+
         public int CarritoId { get; set; }
         public int UsuarioId { get; set; }
         public int ProductoId { get; set; }
@@ -12,5 +17,6 @@ namespace JhiroServer.Models
 
         public virtual Producto Producto { get; set; } = null!;
         public virtual Usuario Usuario { get; set; } = null!;
+        public virtual ICollection<OrdenProducto> OrdenProductos { get; set; }
     }
 }

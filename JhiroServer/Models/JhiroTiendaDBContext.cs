@@ -18,16 +18,13 @@ namespace JhiroServer.Models
 
         public virtual DbSet<Carrito> Carritos { get; set; } = null!;
         public virtual DbSet<Categoria> Categorias { get; set; } = null!;
-        public virtual DbSet<Inventario> Inventarios { get; set; } = null!;
-        public virtual DbSet<Orden> Ordens { get; set; } = null!;
         public virtual DbSet<OrdenProducto> OrdenProductos { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
 
-        public virtual DbSet<CarritoSPResult>CarritoSPResults { get; set; } = null!;
+        public virtual DbSet<CarritoSPResult> CarritoSPResults { get; set; } = null!;
 
-         public virtual DbSet<EliminarProductoCarritoResult>EliminarProductoCarritoResults { get; set; }
-
+        public virtual DbSet<EliminarProductoCarritoResult> EliminarProductoCarritoResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,44 +58,21 @@ namespace JhiroServer.Models
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<Inventario>(entity =>
-            {
-                entity.ToTable("Inventario");
-
-                entity.Property(e => e.FechaActualizacion)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.Producto)
-                    .WithMany(p => p.Inventarios)
-                    .HasForeignKey(d => d.ProductoId)
-                    .HasConstraintName("FK__Inventari__Produ__3E52440B");
-            });
-
-            modelBuilder.Entity<Orden>(entity =>
-            {
-                entity.ToTable("Orden");
-
-                entity.Property(e => e.CorreoElectronico).HasMaxLength(255);
-
-                entity.Property(e => e.FechaCreacion)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
-            });
-
             modelBuilder.Entity<OrdenProducto>(entity =>
             {
                 entity.ToTable("OrdenProducto");
 
-                entity.Property(e => e.Precio).HasColumnType("decimal(18, 2)");
-
-                entity.HasOne(d => d.Orden)
+                entity.HasOne(d => d.Carrito)
                     .WithMany(p => p.OrdenProductos)
-                    .HasForeignKey(d => d.OrdenId)
+                    .HasForeignKey(d => d.CarritoId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrdenProd__Orden__59FA5E80");
+                    .HasConstraintName("fk_Carrito_Orden");
+
+                entity.HasOne(d => d.Usuario)
+                    .WithMany(p => p.OrdenProductos)
+                    .HasForeignKey(d => d.UsuarioId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_Usuario_Orden");
             });
 
             modelBuilder.Entity<Producto>(entity =>

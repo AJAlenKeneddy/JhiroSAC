@@ -6,11 +6,10 @@ namespace JhiroServer.Models
     public partial class OrdenProducto
     {
         public int Id { get; set; }
-        public int ProductoId { get; set; }
-        public int Cantidad { get; set; }
-        public decimal Precio { get; set; }
-        public int OrdenId { get; set; }
+        public int CarritoId { get; set; }
+        public int UsuarioId { get; set; }
 
-        public virtual Orden Orden { get; set; } = null!;
+        public virtual Carrito Carrito { get; set; } = null!;
+        public virtual Usuario Usuario { get; set; } = null!;
     }
 }
