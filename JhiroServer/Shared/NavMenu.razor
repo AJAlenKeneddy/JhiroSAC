@@ -67,20 +67,10 @@
     private async Task CerrarSesion()
     {
         
-        var response = await Http.PostAsync("https://jhiro.somee.com/api/Acceso/CerrarSesion", null);
-
-        if (response.IsSuccessStatusCode)
-        {
-            
+        
             await LocalStorage.RemoveItemAsync("authToken");
 
            
-            NavigationManager.NavigateTo("/login");
-        }
-        else
-        {
-            
-            Console.WriteLine("Error al cerrar sesión.");
-        }
+       
     }
 }

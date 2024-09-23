@@ -4,7 +4,6 @@
 @using JhiroServer.Models
 @inject IJSRuntime JSRuntime
 
-
 <h3>Iniciar Sesión</h3>
 
 @if (!string.IsNullOrEmpty(message))
@@ -23,7 +22,7 @@
         <InputText id="correo" class="form-control" @bind-Value="loginModel.Correo" />
     </div>
     <br />
-    
+
     <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
 </EditForm>
 <br />
@@ -49,9 +48,10 @@
                 messageClass = "alert-success";
                 var token = result.Token;
 
-                
+                // Guarda el token en localStorage
                 await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", token);
 
+                // Navegar a la página principal
                 NavigationManager.NavigateTo("/");
             }
             else

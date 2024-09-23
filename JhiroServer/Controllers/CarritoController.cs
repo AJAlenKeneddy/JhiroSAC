@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JhiroServer.Controllers
 {
@@ -230,6 +231,48 @@ namespace JhiroServer.Controllers
                 return StatusCode(500, new Response<string> { IsSuccess = false, Message = $"Error interno del servidor: {ex.Message}" });
             }
         }
+
+        [HttpPost("GuardarCarrito")]
+        public async Task<IActionResult> GuardarCarrito([FromBody] GuardarCarritoRequest request)
+        {
+            // Obtén el token y luego el userId desde el token
+            var token = await _jwtService.GetTokenAsync();
+            var userId = _jwtService.GetUserIdFromToken(token);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { Message = "No se pudo obtener el usuario." });
+            }
+
+            var carritoItems = request.CarritoItems;
+
+            foreach (var item in carritoItems)
+            {
+                // Verifica si ya existe el producto en el carrito del usuario
+                var carritoExistente = await _context.Carritos
+                    .FirstOrDefaultAsync(c => c.UsuarioId.ToString() == userId && c.ProductoId == item.ProductoId);
+
+                if (carritoExistente != null)
+                {
+                    carritoExistente.Cantidad += item.Cantidad;
+                }
+                else
+                {
+                    // Si el producto no está en el carrito, agrégalo
+                    var nuevoCarritoItem = new Carrito
+                    {
+                        UsuarioId = int.Parse(userId), 
+                        ProductoId = item.ProductoId,
+                        Cantidad = item.Cantidad
+                    };
+                    _context.Carritos.Add(nuevoCarritoItem);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Carrito guardado exitosamente." });
+        }
+
 
 
 

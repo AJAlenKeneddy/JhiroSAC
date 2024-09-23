@@ -57,7 +57,13 @@ public class JwtService : IJwtService
             return null;
         }
     }
-
+    public string GetCorreoFromToken(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+        var correoClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+        return correoClaim?.Value;
+    }
     public async Task<string> GetTokenAsync()
     {
       

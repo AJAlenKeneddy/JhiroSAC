@@ -6,9 +6,7 @@
 @inject ILocalStorageService LocalStorage
 @inject ProductoService ProductoService
 @inject IJSRuntime JsRuntime
-
 @inject NavigationManager NavigationManager
-
 
 @if (Categoria == null)
 {
@@ -59,6 +57,7 @@ else
         </div>
     }
 }
+
 <div id="imageModal" class="modal">
     <div class="modal-content">
         <span class="close" @onclick="CloseModal">&times;</span>
@@ -71,20 +70,32 @@ else
     public int CategoriaId { get; set; }
     private List<Producto> productos;
     private Categoria Categoria;
-    private int pageNumber = 1; // Inicializa el número de página
-    private const int pageSize = 10; // Establece el tamaño de la página
+    private int pageNumber = 1;
+    private const int pageSize = 6;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
+            await CargarProductos();
             Categoria = await ProductoService.GetCategoriaAsync(CategoriaId);
             await InicializarCarrito();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al inicializar datos: {ex.Message}");
+        }
+    }
+
+    private async Task CargarProductos()
+    {
+        try
+        {
+            productos = await ProductoService.GetProductosPorCategoriaAsync(CategoriaId, pageNumber);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar productos de la página {pageNumber}: {ex.Message}");
         }
     }
 
@@ -105,24 +116,22 @@ else
 
         if (itemEnCarrito != null)
         {
-            // Actualizar la cantidad del producto existente
             itemEnCarrito.Cantidad++;
         }
         else
         {
-            // Agregar nuevo producto al carrito
             var nuevoItem = new CarritoDTO
                 {
                     ProductoId = producto.ProductoId,
-                    NombreProducto = producto.Nombre,
-                    PrecioProducto = producto.Precio,
-                    Cantidad = 1,
-                    ImagenUrl = producto.ImagenUrl
+                    ImagenUrl=producto.ImagenUrl,
+                    NombreProducto=producto.Nombre,
+                    PrecioProducto=producto.Precio,
+                    UsuarioId = 0,
+                    Cantidad = 1
                 };
             carritoDesdeLocalStorage = carritoDesdeLocalStorage.Append(nuevoItem);
         }
 
-        // Guardar el carrito actualizado en localStorage
         await LocalStorage.SetItemAsync("carrito", carritoDesdeLocalStorage.ToList());
         Console.WriteLine("Producto agregado al carrito.");
     }
@@ -135,20 +144,21 @@ else
         }
     }
 
-    private void PreviousPage()
+    private async Task PreviousPage()
     {
         if (pageNumber > 1)
         {
             pageNumber--;
-            _ = OnInitializedAsync(); // Llamar a la inicialización de nuevo
+            await CargarProductos();
         }
     }
 
-    private void NextPage()
+    private async Task NextPage()
     {
         pageNumber++;
-        _ = OnInitializedAsync(); // Llamar a la inicialización de nuevo
+        await CargarProductos();
     }
+
     private async Task ShowModal(string imageUrl)
     {
         await JsRuntime.InvokeVoidAsync("setImageModalSrc", imageUrl);
@@ -160,4 +170,3 @@ else
         await JsRuntime.InvokeVoidAsync("hideImageModal");
     }
 }
-

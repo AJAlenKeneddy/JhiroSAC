@@ -1,0 +1,99 @@
+﻿@page "/pedido"
+@using Blazored.LocalStorage
+@inject ILocalStorageService LocalStorage
+@inject PedidoService PedidoService
+@using JhiroServer.Models
+@using JhiroServer.Services
+@inject HttpClient Http
+@inject IJwtService JwtService
+@using JhiroServer.Components
+
+<h3>Realizar Pedido</h3>
+
+@if (isLoggedIn)
+{
+    <div>
+        <label for="correo">Correo Electrónico:</label>
+        <input id="correo" @bind="correo" placeholder="Ingresa tu correo" />
+    </div>
+
+    <p>Total a Pagar: @totalAPagar.ToString("C")</p>
+
+    <button @onclick="RealizarPedidoAsync">Realizar Pedido</button>
+
+    <p>@mensaje</p>
+}
+else
+{
+    <Login />
+    
+}
+
+@code {
+    private string mensaje;
+    private decimal totalAPagar;
+    private string correo;
+    private bool isLoggedIn;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var token = await JwtService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                correo = JwtService.GetCorreoFromToken(token);
+                isLoggedIn = !string.IsNullOrEmpty(correo);
+            }
+            else
+            {
+                isLoggedIn = false;
+            }
+
+            await CalcularTotalAPagar();
+            StateHasChanged(); // Asegúrate de actualizar el estado del componente
+        }
+    }
+
+    private async Task CalcularTotalAPagar()
+    {
+        var carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
+        totalAPagar = carritos.Sum(item => item.PrecioProducto * item.Cantidad);
+    }
+
+    private async Task RealizarPedidoAsync()
+    {
+        if (string.IsNullOrEmpty(correo))
+        {
+            mensaje = "Por favor, ingresa tu correo electrónico.";
+            return;
+        }
+
+        var carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
+
+        var pedidoRequest = new PedidoRequest
+            {
+                Correo = correo,
+                Productos = carritos.Select(item => new ProductoPedidoDTO
+                {
+                    ProductoId = item.ProductoId,
+                    NombreProducto = item.NombreProducto,
+                    Cantidad = item.Cantidad,
+                    Precio = item.PrecioProducto,
+                    ImagenUrl = item.ImagenUrl
+                }).ToList()
+            };
+
+        var response = await PedidoService.RealizarPedido(pedidoRequest);
+
+        if (response.IsSuccess)
+        {
+            mensaje = "Pedido realizado con éxito. Verifica tu correo electrónico para los detalles.";
+        }
+        else
+        {
+            mensaje = "Error al realizar el pedido: " + response.Message;
+        }
+    }
+}
+

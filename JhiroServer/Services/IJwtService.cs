@@ -8,6 +8,7 @@ namespace JhiroServer.Services
         string GenerateToken(Usuario usuario);
         string GetUserIdFromToken(string token);
 
+        string GetCorreoFromToken(string token);
         Task<string> GetTokenAsync(); 
     }
 }
