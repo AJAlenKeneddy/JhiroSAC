@@ -48,10 +48,10 @@
                 messageClass = "alert-success";
                 var token = result.Token;
 
-                // Guarda el token en localStorage
+                
                 await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", token);
 
-                // Navegar a la página principal
+                
                 NavigationManager.NavigateTo("/");
             }
             else

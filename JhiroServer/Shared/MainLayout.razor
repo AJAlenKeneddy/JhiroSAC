@@ -1,16 +1,91 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager NavigationManager
-<PageTitle>JhiroServer</PageTitle>
+@using Blazored.LocalStorage
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<div class="transparent-header py-3 sticky-top">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <!-- Logo o Nombre de la tienda -->
+        <a href="/" class="logo">
+            <img src="https://jhiroperu.com/wp-content/uploads/2023/09/Jhironegativo-214x57.png" alt="Jhiro Server" class="img-fluid" style="max-height: 50px;">
+        </a>
+
+        <!-- Dropdown para pantallas pequeñas -->
+        <div class="dropdown d-lg-none">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="headerMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                Menú
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="headerMenu">
+                <li><a class="dropdown-item" href="/polos"><strong>POLOS</strong></a></li>
+                <li><a class="dropdown-item" href="/camisas"><strong>CAMISAS</strong></a></li>
+                <li><a class="dropdown-item" href="/pantalones"><strong>PANTALONES</strong></a></li>
+                <li><a class="dropdown-item" href="/casacas"><strong>CASACAS</strong></a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userMenuSmall" data-bs-toggle="dropdown" aria-expanded="false">
+                            USUARIO
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuSmall">
+                            <li><a class="dropdown-item" href="/login">INICIAR SESIÓN</a></li>
+                            <li><a class="dropdown-item" href="/register">REGISTRARSE</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item" @onclick="CerrarSesion">CERRAR SESIÓN</button></li>
+                        </ul>
+                    </div>
+                </li>
+                <li><a class="dropdown-item" href="/carrito"><strong>CARRITO</strong></a></li>
+            </ul>
+        </div>
+
+        <!-- Categorías (para pantallas grandes) -->
+        <div class="categories d-none d-lg-flex">
+            <a href="/polos" class="nav-link"><strong>POLOS</strong></a>
+            <a href="/camisas" class="nav-link"><strong>CAMISAS</strong></a>
+            <a href="/pantalones" class="nav-link"><strong>PANTALONES</strong></a>
+            <a href="/casacas" class="nav-link"><strong>CASACAS</strong></a>
+        </div>
+
+        <!-- Opciones de usuario y carrito (para pantallas grandes) -->
+        <div class="user-cart d-none d-lg-flex align-items-center">
+            <!-- Icono de usuario -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user"></i> USUARIO
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                    <li><a class="dropdown-item" href="/login">INICIAR SESIÓN</a></li>
+                    <li><a class="dropdown-item" href="/register">REGISTRARSE</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><button class="dropdown-item" @onclick="CerrarSesion">CERRAR SESIÓN</button></li>
+                </ul>
+            </div>
+
+            <!-- Icono del carrito -->
+            <a href="/carrito" class="nav-link ms-3">
+                <i class="fas fa-shopping-cart"></i> CARRITO
+            </a>
+        </div>
     </div>
+</div>
 
+<!-- Aquí sigue el contenido habitual del layout -->
+<div class="page">
     <main>
-        
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+@code {
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
+
+    private async Task CerrarSesion()
+    {
+        // Eliminar el token del LocalStorage (usando Blazored.LocalStorage)
+        await LocalStorage.RemoveItemAsync("authToken");
+
+        // Redirigir al usuario a la página de inicio de sesión
+        NavigationManager.NavigateTo("/login");
+    }
+}

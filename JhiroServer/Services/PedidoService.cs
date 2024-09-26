@@ -12,7 +12,7 @@ public class PedidoService
 
     public async Task<PedidoResponse> RealizarPedido(PedidoRequest request)
     {
-        var response = await _httpClient.PostAsJsonAsync("https://localhost:7048/api/Acceso/RealizarPedido", request);
+        var response = await _httpClient.PostAsJsonAsync("https://jhiro.somee.com/api/Acceso/RealizarPedido", request);
         return await response.Content.ReadFromJsonAsync<PedidoResponse>();
     }
 }

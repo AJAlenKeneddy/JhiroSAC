@@ -1,6 +1,4 @@
-﻿
-
-@using Blazored.LocalStorage
+﻿@using Blazored.LocalStorage
 @inject HttpClient Http
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
@@ -8,7 +6,7 @@
 <div class="top-row ps-3 navbar navbar-dark">
     <Dropdown Color="DropdownColor.Secondary">
         <DropdownToggleButton>
-            <i class="fas fa-user"></i> 
+            <i class="fas fa-user"></i>
         </DropdownToggleButton>
         <DropdownMenu>
             <DropdownItem To="/login" Type="DropdownItemType.Link">Login</DropdownItem>
@@ -66,11 +64,6 @@
 
     private async Task CerrarSesion()
     {
-        
-        
-            await LocalStorage.RemoveItemAsync("authToken");
-
-           
-       
+        await LocalStorage.RemoveItemAsync("authToken");
     }
 }
