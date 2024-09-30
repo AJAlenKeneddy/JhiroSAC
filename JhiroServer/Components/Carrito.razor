@@ -6,125 +6,9 @@
 @using JhiroServer.Models
 @using Blazored.LocalStorage
 @inject IJSRuntime JsRuntime
+@inject PayPalService PayPalService
 
-
-
-@code {
-    private List<CarritoDTO> carritos = new();
-    private List<CarritoDTO> productosEliminados = new();
-    private bool isLoading = true;
-    private string errorMessage;
-    private string mensajeRecuperado;
-    private string mensajeEliminadoPermanente;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await CargarCarrito();
-        await CargarProductosEliminados();
-        isLoading = false; 
-    }
-
-    private async Task CargarCarrito()
-    {
-        try
-        {
-            carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"";
-        }
-    }
-
-    private async Task CargarProductosEliminados()
-    {
-        try
-        {
-            productosEliminados = await LocalStorage.GetItemAsync<List<CarritoDTO>>("productosEliminados") ?? new List<CarritoDTO>();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"";
-        }
-    }
-
-    private async Task ActualizarCantidad(int productoId, int nuevaCantidad)
-    {
-        if (nuevaCantidad < 1)
-        {
-            errorMessage = "La cantidad debe ser mayor a 0.";
-            return;
-        }
-
-        var item = carritos.FirstOrDefault(c => c.ProductoId == productoId);
-        if (item != null)
-        {
-            item.Cantidad = nuevaCantidad;
-            await ActualizarCarritoEnLocalStorage();
-        }
-    }
-
-    private async Task EliminarProducto(int productoId)
-    {
-        var productoEliminado = carritos.FirstOrDefault(c => c.ProductoId == productoId);
-        if (productoEliminado != null)
-        {
-            carritos.RemoveAll(c => c.ProductoId == productoId);
-            productosEliminados.Add(productoEliminado);
-            mensajeRecuperado = $"{productoEliminado.NombreProducto} ha sido eliminado del carrito.";
-            await ActualizarCarritoEnLocalStorage();
-            await ActualizarProductosEliminadosEnLocalStorage();
-        }
-    }
-
-    private async Task EliminarPermanente(int productoId)
-    {
-        var productoEliminado = productosEliminados.FirstOrDefault(c => c.ProductoId == productoId);
-        if (productoEliminado != null)
-        {
-            productosEliminados.Remove(productoEliminado);
-            mensajeEliminadoPermanente = $"{productoEliminado.NombreProducto} ha sido eliminado permanentemente.";
-            await ActualizarProductosEliminadosEnLocalStorage();
-        }
-    }
-
-    private async Task RecuperarProducto(int productoId)
-    {
-        var productoRecuperado = productosEliminados.FirstOrDefault(c => c.ProductoId == productoId);
-        if (productoRecuperado != null)
-        {
-            carritos.Add(productoRecuperado);
-            productosEliminados.Remove(productoRecuperado);
-            mensajeRecuperado = $"{productoRecuperado.NombreProducto} ha sido recuperado al carrito.";
-            await ActualizarCarritoEnLocalStorage();
-            await ActualizarProductosEliminadosEnLocalStorage();
-        }
-    }
-
-    private async Task ActualizarCarritoEnLocalStorage()
-    {
-        await LocalStorage.SetItemAsync("carrito", carritos);
-    }
-
-    private async Task ActualizarProductosEliminadosEnLocalStorage()
-    {
-        await LocalStorage.SetItemAsync("productosEliminados", productosEliminados);
-    }
-    private async Task ShowModal(string imageUrl)
-    {
-        await JsRuntime.InvokeVoidAsync("setImageModalSrc", imageUrl);
-        await JsRuntime.InvokeVoidAsync("showImageModal");
-    }
-
-    private async Task CloseModal()
-    {
-        await JsRuntime.InvokeVoidAsync("hideImageModal");
-    }
-    private async Task IrAPagar()
-    {
-         NavigationManager.NavigateTo("/pedido");
-    }
-}
+<h3>Carrito</h3>
 
 @if (isLoading)
 {
@@ -203,9 +87,126 @@ else
         </ul>
     }
 }
+
 <div id="imageModal" class="modal">
     <div class="modal-content">
         <span class="close" @onclick="CloseModal">&times;</span>
         <img id="modalImage" src="" alt="Imagen en grande">
     </div>
 </div>
+
+@code {
+    private List<CarritoDTO> carritos = new();
+    private List<CarritoDTO> productosEliminados = new();
+    private bool isLoading = true;
+    private string errorMessage;
+    private string mensajeRecuperado;
+    private string mensajeEliminadoPermanente;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarCarrito();
+        await CargarProductosEliminados();
+        isLoading = false; // Asegúrate de establecer esto aquí
+    }
+
+    private async Task CargarCarrito()
+    {
+        try
+        {
+            carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error al cargar el carrito: " + ex.Message;
+        }
+    }
+
+    private async Task CargarProductosEliminados()
+    {
+        try
+        {
+            productosEliminados = await LocalStorage.GetItemAsync<List<CarritoDTO>>("productosEliminados") ?? new List<CarritoDTO>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error al cargar productos eliminados: " + ex.Message;
+        }
+    }
+
+    private async Task ActualizarCantidad(int productoId, int nuevaCantidad)
+    {
+        if (nuevaCantidad < 1)
+        {
+            var item = carritos.FirstOrDefault(c => c.ProductoId == productoId);
+            if (item != null)
+            {
+                await EliminarProducto(item.ProductoId); // Eliminar si la nueva cantidad es menor que 1
+            }
+            return;
+        }
+
+        var itemToUpdate = carritos.FirstOrDefault(c => c.ProductoId == productoId);
+        if (itemToUpdate != null)
+        {
+            itemToUpdate.Cantidad = nuevaCantidad;
+            await LocalStorage.SetItemAsync("carrito", carritos);
+            await CargarCarrito(); // Recargar el carrito para reflejar los cambios
+        }
+    }
+
+    private async Task EliminarProducto(int productoId)
+    {
+        var item = carritos.FirstOrDefault(c => c.ProductoId == productoId);
+        if (item != null)
+        {
+            carritos.Remove(item);
+            productosEliminados.Add(item);
+            await LocalStorage.SetItemAsync("carrito", carritos);
+            await LocalStorage.SetItemAsync("productosEliminados", productosEliminados);
+            mensajeEliminadoPermanente = "Producto eliminado del carrito.";
+            await CargarCarrito(); // Recargar el carrito para reflejar los cambios
+        }
+    }
+
+    private async Task RecuperarProducto(int productoId)
+    {
+        var item = productosEliminados.FirstOrDefault(c => c.ProductoId == productoId);
+        if (item != null)
+        {
+            productosEliminados.Remove(item);
+            carritos.Add(item);
+            await LocalStorage.SetItemAsync("carrito", carritos);
+            await LocalStorage.SetItemAsync("productosEliminados", productosEliminados);
+            mensajeRecuperado = "Producto recuperado.";
+            await CargarCarrito(); // Recargar el carrito para reflejar los cambios
+        }
+    }
+
+    private async Task EliminarPermanente(int productoId)
+    {
+        var item = productosEliminados.FirstOrDefault(c => c.ProductoId == productoId);
+        if (item != null)
+        {
+            productosEliminados.Remove(item);
+            await LocalStorage.SetItemAsync("productosEliminados", productosEliminados);
+            mensajeEliminadoPermanente = "Producto eliminado permanentemente.";
+        }
+    }
+
+    private async Task IrAPagar()
+    {
+        NavigationManager.NavigateTo("/pedido");
+    }
+
+    private void ShowModal(string imageUrl)
+    {
+        var modalImage = new { url = imageUrl };
+        JsRuntime.InvokeVoidAsync("showModal", modalImage);
+    }
+
+    private void CloseModal()
+    {
+        JsRuntime.InvokeVoidAsync("closeModal");
+    }
+}

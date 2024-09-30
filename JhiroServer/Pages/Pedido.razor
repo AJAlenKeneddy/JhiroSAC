@@ -1,11 +1,13 @@
 ﻿@page "/pedido"
 @using Blazored.LocalStorage
 @inject ILocalStorageService LocalStorage
-@inject PedidoService PedidoService
+
 @using JhiroServer.Models
 @using JhiroServer.Services
-@inject HttpClient Http
 @inject IJwtService JwtService
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory ClientFactory
+@inject PayPalService PayPalService
 @using JhiroServer.Components
 
 <h3>Realizar Pedido</h3>
@@ -19,14 +21,13 @@
 
     <p>Total a Pagar: @totalAPagar.ToString("C")</p>
 
-    <button @onclick="RealizarPedidoAsync">Realizar Pedido</button>
+    <button @onclick="IrAPagar">Pagar con PayPal</button>
 
     <p>@mensaje</p>
 }
 else
 {
     <Login />
-    
 }
 
 @code {
@@ -39,39 +40,77 @@ else
     {
         if (firstRender)
         {
+            Console.WriteLine("Inicializando estado...");
+            await InicializarEstado();
+        }
+
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        if (query["status"] != null)
+        {
+            Console.WriteLine($"Manejando respuesta de PayPal: {query["status"]}");
+            await ManejarRespuestaPayPal(query.ToString());
+        }
+    }
+
+    private async Task InicializarEstado()
+    {
+        try
+        {
+            Console.WriteLine("Obteniendo token...");
             var token = await JwtService.GetTokenAsync();
             if (!string.IsNullOrEmpty(token))
             {
+                Console.WriteLine("Token obtenido con éxito.");
                 correo = JwtService.GetCorreoFromToken(token);
                 isLoggedIn = !string.IsNullOrEmpty(correo);
             }
             else
             {
+                Console.WriteLine("No se encontró el token.");
                 isLoggedIn = false;
             }
 
             await CalcularTotalAPagar();
-            StateHasChanged();  
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Error durante la carga inicial: {ex.Message}";
+            Console.WriteLine(mensaje);
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 
-    private async Task CalcularTotalAPagar()
+    private async Task IrAPagar()
+    {
+        try
+        {
+            var pedidoRequest = await CrearPedidoRequest();
+            Console.WriteLine("Creando orden de PayPal...");
+            var (approveUrl, token) = await PayPalService.CreatePayPalOrder(totalAPagar);
+            mensaje = "Pedido realizado con éxito. Continúa con el proceso de PayPal.";
+
+            await LocalStorage.SetItemAsync("paypalToken", token);
+            Console.WriteLine($"Redirigiendo a PayPal: {approveUrl}");
+            NavigationManager.NavigateTo(approveUrl);
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Error al iniciar el pago: {ex.Message}";
+            Console.WriteLine(mensaje);
+        }
+    }
+
+    private async Task<PedidoRequest> CrearPedidoRequest()
     {
         var carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
         totalAPagar = carritos.Sum(item => item.PrecioProducto * item.Cantidad);
-    }
 
-    private async Task RealizarPedidoAsync()
-    {
-        if (string.IsNullOrEmpty(correo))
-        {
-            mensaje = "Por favor, ingresa tu correo electrónico.";
-            return;
-        }
-
-        var carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
-
-        var pedidoRequest = new PedidoRequest
+        return new PedidoRequest
             {
                 Correo = correo,
                 Productos = carritos.Select(item => new ProductoPedidoDTO
@@ -83,17 +122,51 @@ else
                     ImagenUrl = item.ImagenUrl
                 }).ToList()
             };
+    }
 
-        var response = await PedidoService.RealizarPedido(pedidoRequest);
-
-        if (response.IsSuccess)
+    private async Task CalcularTotalAPagar()
+    {
+        try
         {
-            mensaje = "Pedido realizado con éxito. Verifica tu correo electrónico para los detalles.";
+            var carritos = await LocalStorage.GetItemAsync<List<CarritoDTO>>("carrito") ?? new List<CarritoDTO>();
+            totalAPagar = carritos.Sum(item => item.PrecioProducto * item.Cantidad);
+            Console.WriteLine($"Total a pagar calculado: {totalAPagar.ToString("C")}");
         }
-        else
+        catch (Exception ex)
         {
-            mensaje = "Error al realizar el pedido: " + response.Message;
+            mensaje = $"Error al calcular el total a pagar: {ex.Message}";
+            Console.WriteLine(mensaje);
         }
     }
-}
 
+    private async Task ManejarRespuestaPayPal(string status)
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        if (query["status"] == "success")
+        {
+            Console.WriteLine("Pago exitoso. Capturando el pago...");
+            var token = await LocalStorage.GetItemAsync<string>("paypalToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var captureResponse = await PayPalService.CapturePayPalOrder(token);
+                mensaje = captureResponse.IsSuccess ? "Pago capturado exitosamente." : captureResponse.Message;
+                Console.WriteLine(mensaje);
+            }
+            else
+            {
+                mensaje = "No se recibió un token válido de PayPal.";
+                Console.WriteLine(mensaje);
+            }
+        }
+        else if (query["status"] == "cancelled")
+        {
+            mensaje = "El pago ha sido cancelado.";
+            Console.WriteLine(mensaje);
+        }
+
+        await CalcularTotalAPagar();
+    }
+}
